@@ -61,4 +61,5 @@ public class NeuralNetwork implements Serializable {
         return null;
     }
 
+
 }
