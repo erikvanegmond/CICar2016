@@ -1,16 +1,27 @@
 import scr.SensorModel;
 
 import java.io.*;
+import org.neuroph.core.NeuralNetwork;
 
-public class NeuralNetwork implements Serializable {
+public class NeuralNetworkWrapper implements Serializable {
 
     private static final long serialVersionUID = -88L;
 
-    NeuralNetwork(int inputs, int hidden, int outputs) {
+    NeuralNetwork neuralNetwork;
+
+    NeuralNetworkWrapper(String filePath) {
+        neuralNetwork = NeuralNetwork.createFromFile(filePath);
     }
 
-    public double getOutput(SensorModel a) {
-        return 0.5;
+    public NeuralNetworkWrapper() {
+        this("trained_models/myMlPerceptron.nnet");
+    }
+
+    public double getOutput(double[] input) {
+        neuralNetwork.setInput(input);
+        neuralNetwork.calculate();
+        double[] output = neuralNetwork.getOutput();
+        return output[0];
     }
 
     //Store the state of this neural network

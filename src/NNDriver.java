@@ -8,13 +8,14 @@ import cicontest.torcs.genome.IGenome;
 import scr.Action;
 import scr.SensorModel;
 
-public class DefaultDriver extends AbstractDriver {
+import javax.sound.midi.Soundbank;
 
-    private NeuralNetworkWrapper neuralNetwork;
+public class NNDriver extends AbstractDriver {
+    NeuralNetworkWrapper accNN;
 
-    public DefaultDriver() {
+    public NNDriver() {
         initialize();
-        neuralNetwork = new NeuralNetworkWrapper();
+        accNN = new NeuralNetworkWrapper("trained_models/myMlPerceptron.nnet");
 //        neuralNetwork = neuralNetwork.loadGenome();
     }
 
@@ -36,8 +37,11 @@ public class DefaultDriver extends AbstractDriver {
 
     @Override
     public double getAcceleration(SensorModel sensors) {
-        double[] sensorArray = new double[4];
-//        double output = neuralNetwork.getOutput(sensors);
+        double[] sensorArray = new double[19];
+        sensorArray[0] = sensors.getSpeed();
+        System.arraycopy(sensors.getTrackEdgeSensors(), 0, sensorArray, 1, 18);
+        System.out.println(sensorArray);
+        double output = accNN.getOutput(sensorArray);
         return 1;
     }
 

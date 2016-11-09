@@ -15,7 +15,7 @@ public class DefaultDriverAlgorithm extends AbstractAlgorithm {
     int[] results = new int[1];
 
     public Class<? extends Driver> getDriverClass() {
-        return DefaultDriver.class;
+        return NNDriver.class;
     }
 
     public void run(boolean continue_from_checkpoint) {
