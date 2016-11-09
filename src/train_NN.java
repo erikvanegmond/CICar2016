@@ -14,9 +14,9 @@ public class train_NN {
 
     public static void main(String[] args) {
 
-        DataSet trainingSet = DataSet.createFromFile("./train_data/aalborg3.csv",2, 1, ",", true);
+        DataSet trainingSet = DataSet.createFromFile("./train_data/aalborg4.csv",19, 1, ",", true);
         //System.out.println(trainingSet.toString());
-        SupervisedHebbianNetwork NN_acc = new SupervisedHebbianNetwork( 2, 1);
+        SupervisedHebbianNetwork NN_acc = new SupervisedHebbianNetwork( 19, 1);
         System.out.println("start learning");
         NN_acc.learn(trainingSet);
 
