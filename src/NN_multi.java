@@ -2,19 +2,20 @@
  * Created by davidzomerdijk on 11/9/16.
  */
 
-import java.util.Arrays;
 import org.neuroph.core.NeuralNetwork;
-import org.neuroph.nnet.MultiLayerPerceptron;
 import org.neuroph.core.data.DataSet;
 import org.neuroph.core.data.DataSetRow;
+import org.neuroph.nnet.MultiLayerPerceptron;
 import org.neuroph.util.TransferFunctionType;
+
+import java.util.Arrays;
 
     /**
      * This sample shows how to create, train, save and load simple Multi Layer Perceptron
      */
     public class NN_multi {
         public static void main(String[] args) {
-
+            System.out.println("starting main");
 // create training set (logical XOR function)
 //            DataSet trainingSet = new DataSet(2, 1);
 //            trainingSet.addRow(new DataSetRow(new double[]{0, 0}, new double[]{0}));
@@ -23,10 +24,11 @@ import org.neuroph.util.TransferFunctionType;
 //            trainingSet.addRow(new DataSetRow(new double[]{1, 1}, new double[]{0}));
 
 
-            DataSet trainingSet = DataSet.createFromFile("./train_data/aalborg5.csv", 19, 1, ",", true);
+            DataSet trainingSet = DataSet.createFromFile("./train_data/aalborg6.csv", 10, 1, ",", true);
 // create multi layer perceptron
-            MultiLayerPerceptron myMlPerceptron = new MultiLayerPerceptron(TransferFunctionType.TANH, 19, 10, 1);
+            MultiLayerPerceptron myMlPerceptron = new MultiLayerPerceptron(TransferFunctionType.TANH, 10, 5, 1);
 // learn the training set
+            System.out.println("training...");
             myMlPerceptron.learn(trainingSet);
 
 // test perceptron
