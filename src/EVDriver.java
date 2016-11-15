@@ -1,5 +1,4 @@
 import cicontest.algorithm.abstracts.AbstractDriver;
-import cicontest.algorithm.abstracts.DriversUtils;
 import cicontest.torcs.controller.extras.ABS;
 import cicontest.torcs.controller.extras.AutomatedClutch;
 import cicontest.torcs.controller.extras.AutomatedGearbox;
@@ -8,16 +7,14 @@ import cicontest.torcs.genome.IGenome;
 import scr.Action;
 import scr.SensorModel;
 
-import javax.sound.midi.Soundbank;
+public class EVDriver extends AbstractDriver {
+    NeuralNetworkWrapper accEV;
+    NeuralNetworkWrapper brakeEV;
+    NeuralNetworkWrapper steerEV;
 
-public class NNDriver extends AbstractDriver {
-    NeuralNetworkWrapper accNN;
-    NeuralNetworkWrapper brakeNN;
-    NeuralNetworkWrapper steerNN;
-
-    public NNDriver() {
+    public EVDriver() {
         initialize();
-        accNN = new NeuralNetworkWrapper("trained_models/myMlPerceptron.nnet");
+        accEV = new NeuralNetworkWrapper("trained_models/myMlPerceptron.EVet");
 //        neuralNetwork = neuralNetwork.loadGenome();
     }
 
@@ -42,7 +39,7 @@ public class NNDriver extends AbstractDriver {
         double[] sensorArray = new double[19];
         sensorArray[0] = sensors.getSpeed();
         System.arraycopy(sensors.getTrackEdgeSensors(), 0, sensorArray, 1, 18);//(Object src, int srcPos, Object dest, int destPos, int length
-        double output = accNN.getOutput(sensorArray);
+        double output = accEV.getOutput(sensorArray);
         System.out.println(output);
         return output;
     }
@@ -51,14 +48,14 @@ public class NNDriver extends AbstractDriver {
         double[] sensorArray = new double[19];
         sensorArray[0] = sensors.getSpeed();
         System.arraycopy(sensors.getTrackEdgeSensors(), 0, sensorArray, 1, 18);//(Object src, int srcPos, Object dest, int destPos, int length)
-        double output = brakeNN.getOutput(sensorArray);
+        double output = brakeEV.getOutput(sensorArray);
         return output;
     }
         public double getSteering(SensorModel sensors) {
         double[] sensorArray = new double[19];
         sensorArray[0] = sensors.getSpeed();
         System.arraycopy(sensors.getTrackEdgeSensors(), 0, sensorArray, 1, 18);//(Object src, int srcPos, Object dest, int destPos, int length)
-        double output = steerNN.getOutput(sensorArray);
+        double output = steerEV.getOutput(sensorArray);
         return output;
     }
 

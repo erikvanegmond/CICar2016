@@ -49,7 +49,7 @@ public class DefaultDriver extends AbstractDriver {
 
     @Override
     public String getDriverName() {
-        return "Example Controller";
+        return "Default Controller";
     }
 
     @Override
