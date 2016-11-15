@@ -1,31 +1,29 @@
-import java.io.File;
-
 import cicontest.algorithm.abstracts.AbstractAlgorithm;
-import cicontest.algorithm.abstracts.AbstractRace;
 import cicontest.algorithm.abstracts.DriversUtils;
 import cicontest.torcs.controller.Driver;
-import cicontest.torcs.controller.Human;
 import race.TorcsConfiguration;
 
-public class DefaultDriverAlgorithm extends AbstractAlgorithm {
+import java.io.File;
+
+public class NNDriverAlgorithm extends AbstractAlgorithm {
 
     private static final long serialVersionUID = 654963126362653L;
 
-    DefaultDriverGenome[] drivers = new DefaultDriverGenome[1];
+    NNDriverGenome[] drivers = new NNDriverGenome[1];
     int[] results = new int[1];
 
     public Class<? extends Driver> getDriverClass() {
-        return DefaultDriver.class;
+        return NNDriver.class;
     }
 
     public void run(boolean continue_from_checkpoint) {
         if (!continue_from_checkpoint) {
             //init NN
-            DefaultDriverGenome genome = new DefaultDriverGenome();
+            NNDriverGenome genome = new NNDriverGenome();
             drivers[0] = genome;
 
             //Start a race
-            DefaultRace race = new DefaultRace();
+            NNRace race = new NNRace();
             race.setTrack("aalborg", "road");
             race.laps = 1;
 
@@ -53,14 +51,14 @@ public class DefaultDriverAlgorithm extends AbstractAlgorithm {
 		 * Start with -human to race against the best found
 		 *
 		 */
-        DefaultDriverAlgorithm algorithm = new DefaultDriverAlgorithm();
+        NNDriverAlgorithm algorithm = new NNDriverAlgorithm();
         DriversUtils.registerMemory(algorithm.getDriverClass());
         if (args.length > 0 && args[0].equals("-show")) {
-            new DefaultRace().showBest();
+            new NNRace().showBest();
         } else if (args.length > 0 && args[0].equals("-show-race")) {
-            new DefaultRace().showBestRace();
+            new NNRace().showBestRace();
         } else if (args.length > 0 && args[0].equals("-human")) {
-            new DefaultRace().raceBest();
+            new NNRace().raceBest();
         } else if (args.length > 0 && args[0].equals("-continue")) {
             if (DriversUtils.hasCheckpoint()) {
                 DriversUtils.loadCheckpoint().run(true);
