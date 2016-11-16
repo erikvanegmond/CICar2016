@@ -93,8 +93,31 @@ public class NNDriver extends AbstractDriver {
             action = new Action();
         }
         action.accelerate = getAcceleration(sensors);
-        action.steering = getAcceleration(sensors);
-        action.brake = getAcceleration(sensors);
+//        action.steering = getAcceleration(sensors);
+//        action.brake = getAcceleration(sensors);
+
+        action.steering = DriversUtils.alignToTrackAxis(sensors, 0.5);
+
+        if (sensors.getSpeed() > 60.0D) {
+           // action.accelerate = 0.0D;
+            action.brake = 0.0D;
+        }
+
+        action.accelerate = getAcceleration(sensors);
+        if (sensors.getSpeed() > 70.0D) {
+           // action.accelerate = 0.0D;
+            action.brake = -1.0D;
+        }
+
+        if (sensors.getSpeed() <= 60.0D) {
+           // action.accelerate = (80.0D - sensors.getSpeed()) / 80.0D;
+            action.brake = 0.0D;
+        }
+
+        if (sensors.getSpeed() < 30.0D) {
+           // action.accelerate = 1.0D;
+            action.brake = 0.0D;
+        }
 
         System.out.println("--------------" + getDriverName() + "--------------");
         System.out.println("Steering: " + action.steering);

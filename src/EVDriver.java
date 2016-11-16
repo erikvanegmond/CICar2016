@@ -14,7 +14,7 @@ public class EVDriver extends AbstractDriver {
 
     public EVDriver() {
         initialize();
-        accEV = new NeuralNetworkWrapper("trained_models/myMlPerceptron.EVet");
+        accEV = new NeuralNetworkWrapper();
 //        neuralNetwork = neuralNetwork.loadGenome();
     }
 
