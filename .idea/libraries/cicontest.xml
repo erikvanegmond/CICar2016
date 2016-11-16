@@ -5,6 +5,7 @@
       <root url="jar://$PROJECT_DIR$/lib/neuroph-core-2.92.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/slf4j-api-1.7.21.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/slf4j-jdk14-1.7.21.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/encog-core-3.3.0.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
