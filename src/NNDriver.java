@@ -17,7 +17,7 @@ public class NNDriver extends AbstractDriver {
 
     public NNDriver() {
         initialize();
-        accNN = new NeuralNetworkWrapper("trained_models/myMlPerceptron.nnet");
+        accNN = new NeuralNetworkWrapper();
 //        neuralNetwork = neuralNetwork.loadGenome();
     }
 

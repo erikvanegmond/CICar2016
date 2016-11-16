@@ -1,8 +1,18 @@
 import com.sun.tools.doclets.formats.html.SourceToHTMLConverter;
+import org.encog.engine.network.activation.ActivationSigmoid;
+import org.encog.ml.data.MLDataSet;
+import org.encog.neural.networks.BasicNetwork;
+import org.encog.neural.networks.layers.BasicLayer;
+import org.encog.neural.networks.training.lma.LevenbergMarquardtTraining;
+import org.encog.persist.EncogDirectoryPersistence;
+import org.encog.util.csv.CSVFormat;
+import org.encog.util.simple.EncogUtility;
+import org.encog.util.simple.TrainingSetUtil;
 import org.neuroph.core.data.DataSet;
 import org.neuroph.core.data.DataSetRow;
 import org.neuroph.nnet.SupervisedHebbianNetwork;
 
+import java.io.File;
 import java.util.Arrays;
 
 /**
@@ -16,23 +26,24 @@ public class train_NN {
 
     public static void main(String[] args) {
 
-        DataSet trainingSet = DataSet.createFromFile("./train_data/aalborg4.csv", 19, 1, ",", true);
-        //System.out.println(trainingSet.toString());
-        SupervisedHebbianNetwork NN_acc = new SupervisedHebbianNetwork( 19, 1);
-        System.out.println("start learning");
-        System.out.println( NN_acc.getInputNeurons());
+        //create network
+        BasicNetwork network = new BasicNetwork () ;
+        network.addLayer(new BasicLayer(null,true,19));
+        network.addLayer(new BasicLayer(new ActivationSigmoid() ,true, 20));
+        network.addLayer(new BasicLayer(new ActivationSigmoid() ,false ,1));
+        network.getStructure().finalizeStructure();
+        System.out.println(  network.getLayerCount() );
 
-        //NN_acc.learn(trainingSet);
+        MLDataSet trainingSet = TrainingSetUtil.loadCSVTOMemory(
+                CSVFormat.ENGLISH, "./train_data/aalborg5.csv", true, 19, 1);
 
-        System.out.println("the code has run");
+        //System.out.println( trainingSet.get(1) );
 
-//      for(DataSetRow dataRow : trainingSet.getRows() ) {NN_acc.setInput(dataRow.getInput());
-//          NN_acc.calculate();
-//          double[ ] networkOutput = NN_acc.getOutput();
-//          System.out.println("data: " + Arrays.toString(dataRow.getDesiredOutput() ));
-//          System.out.print("Input: " + Arrays.toString(dataRow.getInput()) );
-//          System.out.println(" Output: " + Arrays.toString(networkOutput) );
-//      }
+        //create training object
+        LevenbergMarquardtTraining train = new LevenbergMarquardtTraining(  network , trainingSet ) ;
+
+        EncogUtility.trainToError(network, trainingSet, 0.0000001);
+        EncogDirectoryPersistence.saveObject(new File("./trained_models/acc_NN"), network);
 
     }
 
