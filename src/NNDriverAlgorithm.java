@@ -30,8 +30,9 @@ public class NNDriverAlgorithm extends AbstractAlgorithm {
             //for speedup set withGUI to false
             results = race.runRace(drivers, true);
 
+
             // Save genome/nn
-            DriversUtils.storeGenome(drivers[0]);
+           // DriversUtils.storeGenome(drivers[0]);
         }
         // create a checkpoint this allows you to continue this run later
         DriversUtils.createCheckpoint(this);

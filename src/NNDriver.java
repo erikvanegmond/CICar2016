@@ -17,7 +17,9 @@ public class NNDriver extends AbstractDriver {
 
     public NNDriver() {
         initialize();
-        accNN = new NeuralNetworkWrapper();
+        accNN = new NeuralNetworkWrapper("./trained_models/acc_NN");
+        brakeNN = new NeuralNetworkWrapper("./trained_models/brake_NN");
+        steerNN = new NeuralNetworkWrapper("./trained_models/steer_NN");
 //        neuralNetwork = neuralNetwork.loadGenome();
     }
 
@@ -39,25 +41,49 @@ public class NNDriver extends AbstractDriver {
 
     @Override
     public double getAcceleration(SensorModel sensors) {
-        double[] sensorArray = new double[19];
+        double[] sensorArray = new double[22];
         sensorArray[0] = sensors.getSpeed();
-        System.arraycopy(sensors.getTrackEdgeSensors(), 0, sensorArray, 1, 18);//(Object src, int srcPos, Object dest, int destPos, int length
+        sensorArray[1] = sensors.getTrackPosition();
+        sensorArray[2] = sensors.getAngleToTrackAxis();
+        System.arraycopy(sensors.getTrackEdgeSensors(), 0, sensorArray, 3, 19);
+
         double output = accNN.getOutput(sensorArray);
-        System.out.println(output);
-        return output;
+
+        if( output > 0.7) {
+            return 1;
+        }
+        else {
+            return 0;
+        }
+
     }
 
     public double getBraking(SensorModel sensors) {
-        double[] sensorArray = new double[19];
+        double[] sensorArray = new double[22];
         sensorArray[0] = sensors.getSpeed();
-        System.arraycopy(sensors.getTrackEdgeSensors(), 0, sensorArray, 1, 18);//(Object src, int srcPos, Object dest, int destPos, int length)
+        sensorArray[1] = sensors.getTrackPosition();
+        sensorArray[2] = sensors.getAngleToTrackAxis();
+
+        System.arraycopy(sensors.getTrackEdgeSensors(), 0, sensorArray, 3, 19);
+
         double output = brakeNN.getOutput(sensorArray);
-        return output;
+
+        if( output > 0.7) {
+            return 1;
+        }
+        else {
+            return 0;
+        }
     }
-        public double getSteering(SensorModel sensors) {
-        double[] sensorArray = new double[19];
+
+    public double getSteering(SensorModel sensors) {
+        double[] sensorArray = new double[22];
         sensorArray[0] = sensors.getSpeed();
-        System.arraycopy(sensors.getTrackEdgeSensors(), 0, sensorArray, 1, 18);//(Object src, int srcPos, Object dest, int destPos, int length)
+        sensorArray[1] = sensors.getTrackPosition();
+        sensorArray[2] = sensors.getAngleToTrackAxis();
+
+        System.arraycopy(sensors.getTrackEdgeSensors(), 0, sensorArray, 3, 19);
+
         double output = steerNN.getOutput(sensorArray);
         return output;
     }
@@ -93,31 +119,9 @@ public class NNDriver extends AbstractDriver {
             action = new Action();
         }
         action.accelerate = getAcceleration(sensors);
-//        action.steering = getAcceleration(sensors);
-//        action.brake = getAcceleration(sensors);
+        action.brake = getBraking(sensors);
+        action.steering = getSteering(sensors);
 
-        action.steering = DriversUtils.alignToTrackAxis(sensors, 0.5);
-
-        if (sensors.getSpeed() > 60.0D) {
-           // action.accelerate = 0.0D;
-            action.brake = 0.0D;
-        }
-
-        action.accelerate = getAcceleration(sensors);
-        if (sensors.getSpeed() > 70.0D) {
-           // action.accelerate = 0.0D;
-            action.brake = -1.0D;
-        }
-
-        if (sensors.getSpeed() <= 60.0D) {
-           // action.accelerate = (80.0D - sensors.getSpeed()) / 80.0D;
-            action.brake = 0.0D;
-        }
-
-        if (sensors.getSpeed() < 30.0D) {
-           // action.accelerate = 1.0D;
-            action.brake = 0.0D;
-        }
 
         System.out.println("--------------" + getDriverName() + "--------------");
         System.out.println("Steering: " + action.steering);

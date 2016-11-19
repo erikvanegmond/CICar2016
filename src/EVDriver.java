@@ -14,7 +14,7 @@ public class EVDriver extends AbstractDriver {
 
     public EVDriver() {
         initialize();
-        accEV = new NeuralNetworkWrapper();
+        accEV = new NeuralNetworkWrapper("");
 //        neuralNetwork = neuralNetwork.loadGenome();
     }
 
