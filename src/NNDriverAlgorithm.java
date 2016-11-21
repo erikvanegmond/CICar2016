@@ -31,6 +31,7 @@ public class NNDriverAlgorithm extends AbstractAlgorithm {
             results = race.runRace(drivers, true);
 
 
+
             // Save genome/nn
            // DriversUtils.storeGenome(drivers[0]);
         }

@@ -11,8 +11,6 @@ public class NeuralNetworkWrapper implements Serializable {
 
     private static final long serialVersionUID = -88L;
 
-
-
 //    public NeuralNetworkWrapper() {
 //        this("./trained_models/acc_NN");
 //    }

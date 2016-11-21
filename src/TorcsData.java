@@ -55,6 +55,11 @@ public class TorcsData {
 
         return double_array;
     }
+//
+//    public double[][] normalize_data(){
+//
+//        return output;
+//    }
 
     public MLDataSet make_data_set(double[][] double_array, String target_variable){
         int rows = double_array.length;

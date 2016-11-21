@@ -21,7 +21,10 @@ public class TrainNnBrake {
         network.addLayer(new BasicLayer(null,true,22));
         network.addLayer(new BasicLayer(new ActivationSigmoid() ,true, 30));
         network.addLayer(new BasicLayer(new ActivationSigmoid() ,false ,1));
+
         network.getStructure().finalizeStructure();
+
+        double yes = network.getWeight(0, 0, 30);
 
         MLDataSet trainingSet = EncogUtility.loadEGB2Memory(new File("./train_data/trainingset_brake") );
         System.out.println( trainingSet.get(381) );

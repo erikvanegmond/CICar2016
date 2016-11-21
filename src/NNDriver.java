@@ -14,13 +14,16 @@ public class NNDriver extends AbstractDriver {
     NeuralNetworkWrapper accNN;
     NeuralNetworkWrapper brakeNN;
     NeuralNetworkWrapper steerNN;
+    RecoverAuto recover;
 
     public NNDriver() {
         initialize();
         accNN = new NeuralNetworkWrapper("./trained_models/acc_NN");
         brakeNN = new NeuralNetworkWrapper("./trained_models/brake_NN");
         steerNN = new NeuralNetworkWrapper("./trained_models/steer_NN");
+        recover = new RecoverAuto();
 //        neuralNetwork = neuralNetwork.loadGenome();
+
     }
 
     private void initialize() {
@@ -118,10 +121,28 @@ public class NNDriver extends AbstractDriver {
         if (action == null) {
             action = new Action();
         }
-        action.accelerate = getAcceleration(sensors);
-        action.brake = getBraking(sensors);
-        action.steering = getSteering(sensors);
+        //process whether we all stuck or not
+        this.recover.process(action, sensors);
 
+        System.out.print("am I on track?: ");
+        System.out.println(sensors.getTrackEdgeSensors()[18] );
+
+
+        if( this.recover.getStuck() > 5) {
+            System.out.println("Recovery that auto sweet sweet hard code!!!!");
+            this.recover.process(action, sensors);
+        }
+        else {
+            if( sensors.getTrackEdgeSensors()[18] == -1 ){
+                //action.steering = (sensors.getAngleToTrackAxis() / 0.785398006439209D);
+            }
+            else{
+                action.accelerate = getAcceleration(sensors);
+                action.brake = getBraking(sensors);
+                action.steering = getSteering(sensors);
+            }
+
+        }
 
         System.out.println("--------------" + getDriverName() + "--------------");
         System.out.println("Steering: " + action.steering);
