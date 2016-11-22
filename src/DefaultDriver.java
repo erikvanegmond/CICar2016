@@ -369,7 +369,7 @@ public class DefaultDriver extends AbstractDriver{
 
 	private void writeToFile(SensorModel sensors, Action action){
         try {
-            String line = action +","+ sensors +"\n";
+            String line = actionsToString(action) +","+sensorsToString(sensors) +"\n";
             train_data.append(line);
         } catch (IOException e) {
         }
