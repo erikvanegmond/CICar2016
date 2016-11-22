@@ -31,10 +31,10 @@ public class DefaultDriver extends AbstractDriver{
 
 	/* Accel and Brake Constants*/
 	final float maxSpeedDist=10;
-	final float maxSpeed=60;
+	final float maxSpeed=41;
 
 	/* Steering constants*/
-	final float steerLock=(float) 0.785398;
+	final float steerLock=(float) (0.785398 - 0.5);
 	final float steerSensitivityOffset=(float) 80.0;
 	final float wheelSensitivityCoeff=1;
 
@@ -143,51 +143,54 @@ public class DefaultDriver extends AbstractDriver{
 	public double getAcceleration(SensorModel sensors)
 	{
 	    // checks if car is out of track
-	    if (sensors.getTrackPosition() < 1 && sensors.getTrackPosition() > -1)
-	    {
-	        // reading of sensor at +5 degree w.r.t. car axis
-			double rxSensor=(double) sensors.getTrackEdgeSensors()[10];
-	        // reading of sensor parallel to car axis
-			double sensorsensor=(double) sensors.getTrackEdgeSensors()[9];
-	        // reading of sensor at -5 degree w.r.t. car axis
-			double sxSensor=(double) sensors.getTrackEdgeSensors()[8];
+        if(sensors.getTrackEdgeSensors()[9] > 70 & sensors.getSpeed() < 180) {
+            return 1;
+        }else{
 
-			double targetSpeed;
 
-	        // track is straight and enough far from a turn so goes to max speed
-	        if (sensorsensor>maxSpeedDist || (sensorsensor>=rxSensor && sensorsensor >= sxSensor))
-	            targetSpeed = maxSpeed;
-	        else
-	        {
-	            // approaching a turn on right
-	            if(rxSensor>sxSensor)
-	            {
-	                // computing approximately the "angle" of turn
-					double h = sensorsensor*sin5;
-					double b = rxSensor - sensorsensor*cos5;
-					double sinAngle = b*b/(h*h+b*b);
-	                // estimate the target speed depending on turn and on how close it is
-	                targetSpeed = maxSpeed*(sensorsensor*sinAngle/maxSpeedDist);
-	            }
-	            // approaching a turn on left
-	            else
-	            {
-	                // computing approximately the "angle" of turn
-					double h = sensorsensor*sin5;
-					double b = sxSensor - sensorsensor*cos5;
-					double sinAngle = b*b/(h*h+b*b);
-	                // estimate the target speed depending on turn and on how close it is
-	                targetSpeed = maxSpeed*(sensorsensor*sinAngle/maxSpeedDist);
-	            }
+            if (sensors.getTrackPosition() < 1 && sensors.getTrackPosition() > -1) {
+                // reading of sensor at +5 degree w.r.t. car axis
+                double rxSensor = (double) sensors.getTrackEdgeSensors()[10];
+                // reading of sensor parallel to car axis
+                double sensorsensor = (double) sensors.getTrackEdgeSensors()[9];
+                // reading of sensor at -5 degree w.r.t. car axis
+                double sxSensor = (double) sensors.getTrackEdgeSensors()[8];
 
-	        }
+                double targetSpeed;
 
-	        // accel/brake command is exponentially scaled w.r.t. the difference between target speed and current one
-	        return (2/(1+Math.exp(sensors.getSpeed() - targetSpeed)) - 1);
-	    }
-	    else
-	        return 0.3; // when out of track returns a moderate acceleration command
+                // track is straight and enough far from a turn so goes to max speed
+                if (sensorsensor > 25 || (sensorsensor >= rxSensor && sensorsensor >= sxSensor))
+                    targetSpeed = 81;
+                else if (sensorsensor > maxSpeedDist || (sensorsensor >= rxSensor && sensorsensor >= sxSensor)){
+                    targetSpeed = maxSpeed;
+                }
+                else {
+                    // approaching a turn on right
+                    if (rxSensor > sxSensor) {
+                        // computing approximately the "angle" of turn
+                        double h = sensorsensor * sin5;
+                        double b = rxSensor - sensorsensor * cos5;
+                        double sinAngle = b * b / (h * h + b * b);
+                        // estimate the target speed depending on turn and on how close it is
+                        targetSpeed = maxSpeed * (sensorsensor * sinAngle / maxSpeedDist);
+                    }
+                    // approaching a turn on left
+                    else {
+                        // computing approximately the "angle" of turn
+                        double h = sensorsensor * sin5;
+                        double b = sxSensor - sensorsensor * cos5;
+                        double sinAngle = b * b / (h * h + b * b);
+                        // estimate the target speed depending on turn and on how close it is
+                        targetSpeed = maxSpeed * (sensorsensor * sinAngle / maxSpeedDist);
+                    }
 
+                }
+
+                // accel/brake command is exponentially scaled w.r.t. the difference between target speed and current one
+                return (2 / (1 + Math.exp(sensors.getSpeed() - targetSpeed)) - 1);
+            } else
+                return 0.3; // when out of track returns a moderate acceleration command
+        }
 	}
 
 	@Override
@@ -270,6 +273,10 @@ public class DefaultDriver extends AbstractDriver{
 	        clutch = clutching(sensors, clutch);
 	        
 	        // build a CarControl variable and return it
+            System.out.println("accel and break:");
+            System.out.println(accel);
+            System.out.println(brake);
+
 	        Action action = new Action ();
 	        action.gear = gear;
 	        action.steering = steer;
