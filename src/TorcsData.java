@@ -6,9 +6,7 @@ import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLDataSet;
 import org.encog.util.simple.EncogUtility;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 
 /**
@@ -16,6 +14,7 @@ import java.util.ArrayList;
  */
 public class TorcsData {
     ArrayList<String[]> Data_list;
+    double[][] normalize_list;
 
 
     public TorcsData() {
@@ -55,11 +54,83 @@ public class TorcsData {
 
         return double_array;
     }
-//
-//    public double[][] normalize_data(){
-//
-//        return output;
-//    }
+
+    //this function creates a list of min and max values for the data.
+    //one can specify how many output values there are since we do not normalize them.
+    public double[][] create_min_max(double[][] input, int number_of_output){
+        int rows = input.length;
+        int cols = input[0].length;
+        double min;
+        double max;
+        double value;
+
+        double[][] min_max_array = new double[cols - number_of_output][2];
+
+        for(int c= number_of_output ; c<cols; c++){
+            min = input[0][c];
+            max = input[0][c];
+
+            for( int r=1; r<rows; r++){
+                value = input[r][c];
+                if( value > max){
+                    max = value;
+                }
+                if( value < min ){
+                    min = value;
+                }
+
+            }
+            min_max_array[c - number_of_output][0] = min;
+            min_max_array[c - number_of_output][1] = max;
+        }
+
+        return min_max_array;
+    }
+
+    public double[][] make_normalized_array(double[][] double_array, int number_of_output){
+        int rows = double_array.length;
+        int cols = double_array[0].length;
+        double min;
+        double max;
+        double value;
+        double norm_value;
+
+        double[][] min_max =  create_min_max(double_array, number_of_output);
+        storeArray(min_max,"./train_data/min_max_array.mem");
+
+
+        double[][] min_max_array = new double[cols - number_of_output][2];
+
+        for(int c=number_of_output  ; c<cols; c++){
+
+            for( int r=1; r<rows; r++){
+                value = double_array[r][c];
+                min = min_max[c - number_of_output][0];
+                max = min_max[c - number_of_output][1];
+                norm_value = (value - min) / (max - min);
+                double_array[r][c] = norm_value ;
+            }
+
+        }
+
+        return double_array;
+    }
+
+    //Stores an Array
+    public void storeArray(double[][] myArray, String inFile) {
+        ObjectOutputStream out = null;
+
+        try {
+            out = new ObjectOutputStream(new FileOutputStream(inFile));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            out.writeObject(myArray);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public MLDataSet make_data_set(double[][] double_array, String target_variable){
         int rows = double_array.length;
@@ -107,7 +178,8 @@ public class TorcsData {
         Data.make_arraylist( "./train_data/aalborg.csv");
         Data.make_arraylist( "./train_data/f-speedway.csv");
         Data.make_arraylist( "./train_data/alpine-1.csv");
-        double [][] double_array = Data.make_double_array();
+        double [][] double_array = Data.make_double_array(); //here we put everything in a double[][]
+        double_array = Data.make_normalized_array(double_array, 3); //here we normalize the data
 
         //creating datasets
         MLDataSet acc_data = Data.make_data_set(double_array, "acceleration");

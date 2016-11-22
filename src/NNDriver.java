@@ -9,12 +9,20 @@ import scr.Action;
 import scr.SensorModel;
 
 import javax.sound.midi.Soundbank;
+import javax.sound.sampled.BooleanControl;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 
 public class NNDriver extends AbstractDriver {
     NeuralNetworkWrapper accNN;
     NeuralNetworkWrapper brakeNN;
     NeuralNetworkWrapper steerNN;
     RecoverAuto recover;
+    double[][] min_max_array;
+    int direction;
+    Boolean on_road;
 
     public NNDriver() {
         initialize();
@@ -22,15 +30,63 @@ public class NNDriver extends AbstractDriver {
         brakeNN = new NeuralNetworkWrapper("./trained_models/brake_NN");
         steerNN = new NeuralNetworkWrapper("./trained_models/steer_NN");
         recover = new RecoverAuto();
+        on_road = true;
+        min_max_array = load_min_max("./train_data/min_max_array.mem");
+        direction = 0; // remembers last directions
 //        neuralNetwork = neuralNetwork.loadGenome();
 
     }
+
 
     private void initialize() {
         this.enableExtras(new AutomatedClutch());
         this.enableExtras(new AutomatedGearbox());
         this.enableExtras(new AutomatedRecovering());
         this.enableExtras(new ABS());
+    }
+
+    //I found this function online and fitted it to my needs
+    public double[][] load_min_max(String inFile) {
+        // Read from disk using FileInputStream
+        FileInputStream f_in = null;
+        try {
+            f_in = new FileInputStream(inFile);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        // Read object using ObjectInputStream
+        ObjectInputStream obj_in = null;
+        try {
+            obj_in = new ObjectInputStream(f_in);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // Read an object
+        try {
+            return (double[][]) obj_in.readObject();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    double[] normalize_array(double[] input ){
+        double value;
+        double min;
+        double max;
+
+        double[] output = new double[ input.length ];
+
+        for(int i=0; i<input.length; i++ ){
+            value = input[i];
+            min = this.min_max_array[i][0];
+            max = this.min_max_array[i][1];
+            output[i] = (value - min) / (max - min);
+        }
+
+        return output;
     }
 
     @Override
@@ -68,7 +124,8 @@ public class NNDriver extends AbstractDriver {
         sensorArray[2] = sensors.getAngleToTrackAxis();
 
         System.arraycopy(sensors.getTrackEdgeSensors(), 0, sensorArray, 3, 19);
-
+        //normalize the input since the NN is trained on normalized data.
+        sensorArray= normalize_array( sensorArray );
         double output = brakeNN.getOutput(sensorArray);
 
         if( output > 0.7) {
@@ -128,22 +185,44 @@ public class NNDriver extends AbstractDriver {
         System.out.println(sensors.getTrackEdgeSensors()[18] );
 
 
-        if( this.recover.getStuck() > 5) {
+        if( this.recover.getStuck() > 40) {
             System.out.println("Recovery that auto sweet sweet hard code!!!!");
             this.recover.process(action, sensors);
         }
+        // make something that when coming close to an edge steers either away from the edge or straigt,  (depending on axis))
         else {
-            if( sensors.getTrackEdgeSensors()[18] == -1 ){
-                //action.steering = (sensors.getAngleToTrackAxis() / 0.785398006439209D);
+            if(sensors.getTrackEdgeSensors()[18] < 0){
+                on_road = false;
             }
-            else{
-                action.accelerate = getAcceleration(sensors);
-                action.brake = getBraking(sensors);
-                action.steering = getSteering(sensors);
+
+            if(on_road) {
+                if (sensors.getAngleToTrackAxis() > 0) {
+                    this.direction = 1;
+                } else {
+                    this.direction = -1;
+                }
             }
+
+            if(sensors.getTrackEdgeSensors()[18] < 0 ){
+                action.steering = this.direction * 0.5;
+            }
+            else {
+                if (sensors.getTrackEdgeSensors()[18] < 0.7 | sensors.getTrackEdgeSensors()[0] < 0.7) {
+                    action.steering = direction * 0.3;
+                    //action.steering = (sensors.getAngleToTrackAxis() / 0.785398006439209D);
+                } else {
+                    action.steering = getSteering(sensors);
+                }
+            }
+
+            action.accelerate = getAcceleration(sensors);
+            action.brake = getBraking(sensors);
+
+
 
         }
 
+        System.out.println(sensors.getTrackPosition()) ;
         System.out.println("--------------" + getDriverName() + "--------------");
         System.out.println("Steering: " + action.steering);
         System.out.println("Acceleration: " + action.accelerate);

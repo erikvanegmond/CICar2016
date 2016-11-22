@@ -3,3 +3,14 @@ Questions for TA:
 -which sensor does the last sensor represent
 -how to know which sensor is which?
 -why is the last line only 20 datapoints long?
+
+-Maybe we should just train a neural network on the default driver.
+-or hard code a proper driver and train the neural network on this.
+-make a very good autorecover
+-how to make sure our neural network doesn't crash. (heuristics)
+-why is our neural steering so bad.
+-so we have to gather data
+-let the neural network train on getting out of messy situations.
+-can we train the neural network on getting out of a problem.
+-train NN on being outside of the track.
+-ask for good auto recover tips.
