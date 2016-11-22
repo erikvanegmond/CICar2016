@@ -24,7 +24,6 @@ public class TrainNnBrake {
 
         network.getStructure().finalizeStructure();
 
-        double yes = network.getWeight(0, 0, 30);
 
         MLDataSet trainingSet = EncogUtility.loadEGB2Memory(new File("./train_data/trainingset_brake") );
         System.out.println( trainingSet.get(381) );

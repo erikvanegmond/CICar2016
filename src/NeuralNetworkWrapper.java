@@ -24,7 +24,6 @@ public class NeuralNetworkWrapper implements Serializable {
 
     public double getOutput(double[] input) {
         MLData input_NN = new BasicMLData(input);
-        System.out.println(input.length);
         MLData output = NN_acc.compute(input_NN);
         return output.getData(0);
     }
