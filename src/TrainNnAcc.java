@@ -29,7 +29,7 @@ public class TrainNnAcc {
         //create training object
         LevenbergMarquardtTraining train = new LevenbergMarquardtTraining(  network , trainingSet ) ;
 
-        EncogUtility.trainToError(network, trainingSet, 0.06);
+        EncogUtility.trainToError(network, trainingSet, 0.11);
         EncogDirectoryPersistence.saveObject(new File("./trained_models/acc_NN"), network);
 
         System.out.println("Neural Network Results:");

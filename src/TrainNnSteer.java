@@ -24,9 +24,8 @@ public class TrainNnSteer {
         //create network
         BasicNetwork network = new BasicNetwork () ;
         network.addLayer(new BasicLayer(null,true,22));
-        network.addLayer(new BasicLayer(new ActivationSigmoid() ,true, 60));
-        network.addLayer(new BasicLayer(new ActivationSigmoid() ,true, 40));
-        network.addLayer(new BasicLayer(new ActivationSigmoid() ,true, 30));
+        //network.addLayer(new BasicLayer(new ActivationSigmoid() ,true, 30));
+        //network.addLayer(new BasicLayer(new ActivationSigmoid() ,true, 20));
         network.addLayer(new BasicLayer(new ActivationTANH() ,true ,1));
         network.getStructure().finalizeStructure();
         network.reset();
@@ -37,7 +36,7 @@ public class TrainNnSteer {
         //create training object
         LevenbergMarquardtTraining train = new LevenbergMarquardtTraining(  network , trainingSet ) ;
 
-        EncogUtility.trainToError(network, trainingSet, 0.02);
+        EncogUtility.trainToError(network, trainingSet, 0.006);
         EncogDirectoryPersistence.saveObject(new File("./trained_models/steer_NN"), network);
 
         System.out.println("Neural Network Results:");

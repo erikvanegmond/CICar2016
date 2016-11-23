@@ -23,6 +23,7 @@ public class NNDriver extends AbstractDriver {
     double[][] min_max_array;
     int direction;
     Boolean on_road;
+    private float steerLock=(float) (0.785398 - 0.5);
 
     public NNDriver() {
         initialize();
@@ -179,48 +180,40 @@ public class NNDriver extends AbstractDriver {
             action = new Action();
         }
         //process whether we all stuck or not
-        this.recover.process(action, sensors);
+
 
         System.out.print("am I on track?: ");
         System.out.println(sensors.getTrackEdgeSensors()[18] );
 
+        if(sensors.getTrackEdgeSensors()[18] < 0 ){
+            /* set gear and sterring command assuming car is
+	    	 * pointing in a direction out of track */
 
-        if( this.recover.getStuck() > 40) {
-            System.out.println("Recovery that auto sweet sweet hard code!!!!");
-            this.recover.process(action, sensors);
+            // to bring car parallel to track axis
+            double steer = (double) (- sensors.getAngleToTrackAxis() / steerLock);
+            int gear=-1; // gear R
+
+            // if car is pointing in the correct direction revert gear and steer
+            if (sensors.getAngleToTrackAxis()*sensors.getTrackPosition()>0)
+            {
+                gear = 1;
+                steer = -steer;
+            }
+            // build a CarControl variable and return it
+            action.gear = gear;
+            action.steering = steer;
+            action.accelerate = 1.0;
+            action.brake = 0;
+
         }
-        // make something that when coming close to an edge steers either away from the edge or straigt,  (depending on axis))
         else {
-            if(sensors.getTrackEdgeSensors()[18] < 0){
-                on_road = false;
-            }
-
-            if(on_road) {
-                if (sensors.getAngleToTrackAxis() > 0) {
-                    this.direction = 1;
-                } else {
-                    this.direction = -1;
-                }
-            }
-
-            if(sensors.getTrackEdgeSensors()[18] < 0 ){
-                action.steering = this.direction * 0.5;
-            }
-            else {
-                if (sensors.getTrackEdgeSensors()[18] < 0.7 | sensors.getTrackEdgeSensors()[0] < 0.7) {
-                    action.steering = direction * 0.3;
-                    //action.steering = (sensors.getAngleToTrackAxis() / 0.785398006439209D);
-                } else {
-                    action.steering = getSteering(sensors);
-                }
-            }
-
-            action.accelerate = getAcceleration(sensors);
-            action.brake = getBraking(sensors);
-
-
+                action.steering = getSteering(sensors);
+                action.accelerate = getAcceleration(sensors);
+                action.brake = getBraking(sensors);
 
         }
+
+
 
         System.out.println(sensors.getTrackPosition()) ;
         System.out.println("--------------" + getDriverName() + "--------------");

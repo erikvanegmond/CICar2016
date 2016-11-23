@@ -1,3 +1,4 @@
+import javafx.scene.paint.Stop;
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.MLDataPair;
@@ -31,7 +32,7 @@ public class TrainNnBrake {
         //create training object
         LevenbergMarquardtTraining train = new LevenbergMarquardtTraining(  network , trainingSet ) ;
 
-        EncogUtility.trainToError(network, trainingSet, 0.06);
+        EncogUtility.trainToError(network, trainingSet, 0.04);
         EncogDirectoryPersistence.saveObject(new File("./trained_models/brake_NN"), network);
 
         System.out.println("Neural Network Results:");
@@ -39,6 +40,7 @@ public class TrainNnBrake {
             final MLData output = network.compute( pair.getInput () ) ;
             System.out.println("actual=" + output.getData(0) +  ", ideal=" + pair.getIdeal().getData(0) ) ;
         }
+
 
 
 

@@ -175,9 +175,16 @@ public class TorcsData {
     public static void main(String[] args) {
 
         TorcsData Data = new TorcsData();
-        Data.make_arraylist( "./train_data/aalborg.csv");
-        Data.make_arraylist( "./train_data/f-speedway.csv");
-        Data.make_arraylist( "./train_data/alpine-1.csv");
+        //Data.make_arraylist( "./train_data/aalborg.csv");
+        //Data.make_arraylist( "./train_data/f-speedway.csv");
+        //Data.make_arraylist( "./train_data/alpine-1.csv");
+        Data.make_arraylist( "./new_train_data/track_1.csv");
+        //Data.make_arraylist( "./new_train_data/track_2.csv");
+        Data.make_arraylist( "./new_train_data/track_3.csv");
+        Data.make_arraylist( "./new_train_data/track_4.csv");
+
+
+
         double [][] double_array = Data.make_double_array(); //here we put everything in a double[][]
         double_array = Data.make_normalized_array(double_array, 3); //here we normalize the data
 
