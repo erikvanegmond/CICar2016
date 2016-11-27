@@ -81,6 +81,7 @@ public class NNDriver extends AbstractDriver {
         double[] output = new double[ input.length ];
 
         for(int i=0; i<input.length; i++ ){
+
             value = input[i];
             min = this.min_max_array[i][0];
             max = this.min_max_array[i][1];
@@ -101,49 +102,56 @@ public class NNDriver extends AbstractDriver {
 
     @Override
     public double getAcceleration(SensorModel sensors) {
-        double[] sensorArray = new double[22];
+        double[] sensorArray = new double[8]; // new double[22];
         sensorArray[0] = sensors.getSpeed();
         sensorArray[1] = sensors.getTrackPosition();
         sensorArray[2] = sensors.getAngleToTrackAxis();
-        System.arraycopy(sensors.getTrackEdgeSensors(), 0, sensorArray, 3, 19);
+
+        sensorArray[3] = sensors.getTrackEdgeSensors()[4];
+        sensorArray[4] = sensors.getTrackEdgeSensors()[6];
+        sensorArray[5] = sensors.getTrackEdgeSensors()[9];
+        sensorArray[6] = sensors.getTrackEdgeSensors()[12];
+        sensorArray[7] = sensors.getTrackEdgeSensors()[14];
+        //System.arraycopy(sensors.getTrackEdgeSensors(), 0, sensorArray, 3, 19);
 
         double output = accNN.getOutput(sensorArray);
 
-        if( output > 0.7) {
-            return 1;
-        }
-        else {
-            return 0;
-        }
+        return output;
 
     }
 
     public double getBraking(SensorModel sensors) {
-        double[] sensorArray = new double[22];
+        double[] sensorArray = new double[8];
         sensorArray[0] = sensors.getSpeed();
         sensorArray[1] = sensors.getTrackPosition();
         sensorArray[2] = sensors.getAngleToTrackAxis();
 
-        System.arraycopy(sensors.getTrackEdgeSensors(), 0, sensorArray, 3, 19);
+        sensorArray[3] = sensors.getTrackEdgeSensors()[4];
+        sensorArray[4] = sensors.getTrackEdgeSensors()[6];
+        sensorArray[5] = sensors.getTrackEdgeSensors()[9];
+        sensorArray[6] = sensors.getTrackEdgeSensors()[12];
+        sensorArray[7] = sensors.getTrackEdgeSensors()[14];
+        //System.arraycopy(sensors.getTrackEdgeSensors(), 0, sensorArray, 3, 19);
         //normalize the input since the NN is trained on normalized data.
         sensorArray= normalize_array( sensorArray );
         double output = brakeNN.getOutput(sensorArray);
 
-        if( output > 0.7) {
-            return 1;
-        }
-        else {
-            return 0;
-        }
+        return output;
     }
 
     public double getSteering(SensorModel sensors) {
-        double[] sensorArray = new double[22];
-        sensorArray[0] = sensors.getSpeed();
-        sensorArray[1] = sensors.getTrackPosition();
-        sensorArray[2] = sensors.getAngleToTrackAxis();
+        double[] sensorArray = new double[7];
+        //sensorArray[0] = sensors.getSpeed();
+        sensorArray[0] = sensors.getTrackPosition();
+        sensorArray[1] = sensors.getAngleToTrackAxis();
 
-        System.arraycopy(sensors.getTrackEdgeSensors(), 0, sensorArray, 3, 19);
+        sensorArray[2] = sensors.getTrackEdgeSensors()[4];
+        sensorArray[3] = sensors.getTrackEdgeSensors()[6];
+        sensorArray[4] = sensors.getTrackEdgeSensors()[9];
+        sensorArray[5] = sensors.getTrackEdgeSensors()[12];
+        sensorArray[6] = sensors.getTrackEdgeSensors()[14];
+
+        //System.arraycopy(sensors.getTrackEdgeSensors(), 0, sensorArray, 3, 19);
 
         double output = steerNN.getOutput(sensorArray);
         return output;
@@ -185,34 +193,13 @@ public class NNDriver extends AbstractDriver {
         System.out.print("am I on track?: ");
         System.out.println(sensors.getTrackEdgeSensors()[18] );
 
-        if(sensors.getTrackEdgeSensors()[18] < 0 ){
-            /* set gear and sterring command assuming car is
-	    	 * pointing in a direction out of track */
+        action.steering = getSteering(sensors);
 
-            // to bring car parallel to track axis
-            double steer = (double) (- sensors.getAngleToTrackAxis() / steerLock);
-            int gear=-1; // gear R
-
-            // if car is pointing in the correct direction revert gear and steer
-            if (sensors.getAngleToTrackAxis()*sensors.getTrackPosition()>0)
-            {
-                gear = 1;
-                steer = -steer;
-            }
-            // build a CarControl variable and return it
-            action.gear = gear;
-            action.steering = steer;
-            action.accelerate = 1.0;
-            action.brake = 0;
-
+        if(sensors.getSpeed() < 61){
+            action.accelerate = 1;
         }
-        else {
-                action.steering = getSteering(sensors);
-                action.accelerate = getAcceleration(sensors);
-                action.brake = getBraking(sensors);
-
-        }
-
+        //action.accelerate = getAcceleration(sensors);
+        action.brake = getBraking(sensors);
 
 
         System.out.println(sensors.getTrackPosition()) ;

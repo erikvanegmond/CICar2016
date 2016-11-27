@@ -34,8 +34,8 @@ public class DefaultDriver extends AbstractDriver{
 	final float maxSpeed=41;
 
 	/* Steering constants*/
-	public float steerLock=(float) (0.785398 - 0.5);
-	final float steerSensitivityOffset=(float) 80.0;
+	public float steerLock=(float) (0.785398 -0.5 );
+	final float steerSensitivityOffset=(float) 75.0;
 	final float wheelSensitivityCoeff=1;
 
 	/* ABS Filter Constants */
@@ -142,15 +142,15 @@ public class DefaultDriver extends AbstractDriver{
 	@Override
 	public double getAcceleration(SensorModel sensors) {
         // checks if car is out of track
-        if (sensors.getTrackEdgeSensors()[9] > 160) {
-            steerLock = (float) (0.785398);
-            return 1;
-        }
-            else{
-            if (sensors.getTrackEdgeSensors()[9] > 90 & sensors.getSpeed() < 181) {
-                steerLock = (float) (0.785398);
-                return 1;
-            } else {
+//        if (sensors.getTrackEdgeSensors()[9] > 160) {
+//            steerLock = (float) (0.785398);
+//            return 1;
+//        }
+//            else{
+//            if (sensors.getTrackEdgeSensors()[9] > 90 & sensors.getSpeed() < 181) {
+//                steerLock = (float) (0.785398);
+//                return 1;
+//            } else {
 
 
                 if (sensors.getTrackPosition() < 1 && sensors.getTrackPosition() > -1) {
@@ -167,7 +167,7 @@ public class DefaultDriver extends AbstractDriver{
                     if (sensorsensor > 25 || (sensorsensor >= rxSensor && sensorsensor >= sxSensor))
                         targetSpeed = 81;
                     else if (sensorsensor > maxSpeedDist || (sensorsensor >= rxSensor && sensorsensor >= sxSensor)) {
-                        steerLock = (float) (0.785398 - 0.5);
+                        //steerLock = (float) (0.785398 );
                         targetSpeed = maxSpeed;
                     } else {
                         // approaching a turn on right
@@ -195,8 +195,8 @@ public class DefaultDriver extends AbstractDriver{
                     return (2 / (1 + Math.exp(sensors.getSpeed() - targetSpeed)) - 1);
                 } else
                     return 0.3; // when out of track returns a moderate acceleration command
-            }
-        }
+//            }
+//        }
     }
 
 	@Override
@@ -243,26 +243,32 @@ public class DefaultDriver extends AbstractDriver{
 	        action.brake = 0;
 	        action.clutch = clutch;
             writeToFile(sensors, action);
+
+
+
             return action;
 	    }
 
 	    else // car is not stuck
 	    {
+
+
+
 	    	// compute accel/brake command
 			double accel_and_brake = getAcceleration(sensors);
 	        // compute gear
 	        int gear = getGear(sensors);
 	        // compute steering
 			double steer = getSteering(sensors);
-	        
+
 
 	        // normalize steering
 	        if (steer < -1)
 	            steer = -1;
 	        if (steer > 1)
 	            steer = 1;
-	        
-	        // set accel and brake from the joint accel/brake command 
+
+	        // set accel and brake from the joint accel/brake command
 			double accel,brake;
 	        if (accel_and_brake>0)
 	        {
@@ -275,9 +281,9 @@ public class DefaultDriver extends AbstractDriver{
 	            // apply ABS to brake
 	            brake = filterABS(sensors,-accel_and_brake);
 	        }
-	        
+
 	        clutch = clutching(sensors, clutch);
-	        
+
 	        // build a CarControl variable and return it
             System.out.println("accel and break:");
             System.out.println(accel);
@@ -286,12 +292,45 @@ public class DefaultDriver extends AbstractDriver{
 	        Action action = new Action ();
 	        action.gear = gear;
 	        action.steering = steer;
-	        action.accelerate = accel;
-	        action.brake = brake;
+	        //action.accelerate = accel;
+	        //action.brake = brake;
 	        action.clutch = clutch;
+
+			int maxspeed =80;
+			if(sensors.getTrackEdgeSensors()[9] < 40){
+				maxspeed = 36;
+			}
+
+
+			if(sensors.getSpeed() < maxspeed){
+				action.accelerate = 1;
+			}
+			else{
+				action.accelerate = 0;
+
+			}
+
+			if(sensors.getTrackEdgeSensors()[9] < 20 && sensors.getSpeed() > maxspeed ){
+
+				action.brake = 1;
+			}
+			else{
+
+				action.brake = 0;
+			}
+
+			System.out.println(sensors.getTrackPosition()) ;
+			System.out.println("--------------" + getDriverName() + "--------------");
+			System.out.println("Steering: " + action.steering);
+			System.out.println("Acceleration: " + action.accelerate);
+			System.out.println("Brake: " + action.brake);
+			System.out.println("-----------------------------------------------");
+
             writeToFile(sensors, action);
 			return action;
 	    }
+
+
 	}
 
 	private double filterABS(SensorModel sensors,double brake){
@@ -397,43 +436,43 @@ public class DefaultDriver extends AbstractDriver{
 		sensorString += ",";
 		sensorString += sensors.getAngleToTrackAxis();
         sensorString += ",";
-        sensorString += sensors.getTrackEdgeSensors()[0];
+//        sensorString += sensors.getTrackEdgeSensors()[0];
+//        sensorString += ",";
+//        sensorString += sensors.getTrackEdgeSensors()[1];
+//        sensorString += ",";
+//        sensorString += sensors.getTrackEdgeSensors()[2];
+//        sensorString += ",";
+//        sensorString += sensors.getTrackEdgeSensors()[3];
+//        sensorString += ",";
+        sensorString += sensors.getTrackEdgeSensors()[4]; // this one
         sensorString += ",";
-        sensorString += sensors.getTrackEdgeSensors()[1];
+//        sensorString += sensors.getTrackEdgeSensors()[5];
+//        sensorString += ",";
+        sensorString += sensors.getTrackEdgeSensors()[6]; // this one
         sensorString += ",";
-        sensorString += sensors.getTrackEdgeSensors()[2];
+//        sensorString += sensors.getTrackEdgeSensors()[7];
+//		sensorString += ",";
+//        sensorString += sensors.getTrackEdgeSensors()[8];
+//        sensorString += ",";
+        sensorString += sensors.getTrackEdgeSensors()[9]; // this one
         sensorString += ",";
-        sensorString += sensors.getTrackEdgeSensors()[3];
-        sensorString += ",";
-        sensorString += sensors.getTrackEdgeSensors()[4];
-        sensorString += ",";
-        sensorString += sensors.getTrackEdgeSensors()[5];
-        sensorString += ",";
-        sensorString += sensors.getTrackEdgeSensors()[6];
-        sensorString += ",";
-        sensorString += sensors.getTrackEdgeSensors()[7];
+//        sensorString += sensors.getTrackEdgeSensors()[10];
+//		sensorString += ",";
+//		sensorString += sensors.getTrackEdgeSensors()[11];
+//		sensorString += ",";
+		sensorString += sensors.getTrackEdgeSensors()[12]; // this one
 		sensorString += ",";
-        sensorString += sensors.getTrackEdgeSensors()[8];
-        sensorString += ",";
-        sensorString += sensors.getTrackEdgeSensors()[9];
-        sensorString += ",";
-        sensorString += sensors.getTrackEdgeSensors()[10];
-		sensorString += ",";
-		sensorString += sensors.getTrackEdgeSensors()[11];
-		sensorString += ",";
-		sensorString += sensors.getTrackEdgeSensors()[12];
-		sensorString += ",";
-		sensorString += sensors.getTrackEdgeSensors()[13];
-		sensorString += ",";
-		sensorString += sensors.getTrackEdgeSensors()[14];
-		sensorString += ",";
-		sensorString += sensors.getTrackEdgeSensors()[15];
-		sensorString += ",";
-		sensorString += sensors.getTrackEdgeSensors()[16];
-		sensorString += ",";
-		sensorString += sensors.getTrackEdgeSensors()[17];
-		sensorString += ",";
-		sensorString += sensors.getTrackEdgeSensors()[18];
+//		sensorString += sensors.getTrackEdgeSensors()[13];
+//		sensorString += ",";
+		sensorString += sensors.getTrackEdgeSensors()[14];  // this one
+//		sensorString += ",";
+//		sensorString += sensors.getTrackEdgeSensors()[15];
+//		sensorString += ",";
+//		sensorString += sensors.getTrackEdgeSensors()[16];
+//		sensorString += ",";
+//		sensorString += sensors.getTrackEdgeSensors()[17];
+//		sensorString += ",";
+//		sensorString += sensors.getTrackEdgeSensors()[18];
 
 
 		return sensorString.replace("[", "").replaceAll("]", "");

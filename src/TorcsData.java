@@ -14,6 +14,7 @@ import java.util.ArrayList;
  */
 public class TorcsData {
     ArrayList<String[]> Data_list;
+    double threshold = 0.0001;
     double[][] normalize_list;
 
 
@@ -53,6 +54,49 @@ public class TorcsData {
         }
 
         return double_array;
+    }
+
+
+    public double[][] boolean_steering_set(double[][] double_array) {
+        double[][] array1 = new double[double_array.length][double_array[0].length ];
+
+        for(int r= 0; r<double_array.length; r++ ){
+            for(int c = 0 ; c< double_array[0].length ;c++){
+                array1[r][c] = double_array[r][c];
+            }
+        }
+
+        for (int i = 0; i < array1.length; i++) {
+            if (array1[i][2] > this.threshold) {
+                array1[i][2] = 1;
+            } else {
+                array1[i][2] = 0;
+            }
+        }
+
+        return array1;
+    }
+
+    public double[][] actual_steering(double[][] boolean_set, double[][] double_array){
+        int count_1 = 0;
+        for(int i = 0; i<boolean_set.length;i++){
+            if(boolean_set[i][2] == 1){
+                count_1++;
+            }
+        }
+
+        double[][] array2 = new double[count_1][double_array[0].length];
+
+        int counter = 0;
+        for(int r= 0; r<double_array.length; r++ ){
+            if(double_array[r][2] > this.threshold){
+                for(int c = 0 ; c< double_array[0].length;c++){
+                    array2[counter][c] = double_array[r][c];
+                }
+                counter ++;
+            }
+        }
+        return array2;
     }
 
     //this function creates a list of min and max values for the data.
@@ -171,17 +215,39 @@ public class TorcsData {
         return training_set;
     }
 
+    public double[][] removeColumn(double[][] double_array, int column){
+        int temp;
+        double[][] new_array = new double[double_array.length][double_array[0].length - 1];
+        for(int r = 0; r<new_array.length;r++){
+            temp = 0;
+            for(int c = 0; c<new_array[0].length;c++){
+                if(column==c ){
+                    temp++;
+                }
+                new_array[r][c] = double_array[r][c+temp];
+            }
+        }
+
+        return new_array;
+    }
+
 
     public static void main(String[] args) {
 
         TorcsData Data = new TorcsData();
+
+        Data.make_arraylist( "./new_train_data/aalborg_zeroone.csv");
+        Data.make_arraylist( "./new_train_data/track_2_zeroone.csv");
+        Data.make_arraylist( "./new_train_data/track_3_zeroone.csv");
+        Data.make_arraylist( "./new_train_data/track_4_zerone.csv");
+        //Data.make_arraylist( "./new_train_data/forza_slow2.csv");
         //Data.make_arraylist( "./train_data/aalborg.csv");
         //Data.make_arraylist( "./train_data/f-speedway.csv");
         //Data.make_arraylist( "./train_data/alpine-1.csv");
-        Data.make_arraylist( "./new_train_data/track_1.csv");
+        //Data.make_arraylist( "./new_train_data/track_1.csv");
         //Data.make_arraylist( "./new_train_data/track_2.csv");
-        Data.make_arraylist( "./new_train_data/track_3.csv");
-        Data.make_arraylist( "./new_train_data/track_4.csv");
+        //Data.make_arraylist( "./new_train_data/track_3.csv");
+        //Data.make_arraylist( "./new_train_data/track_4.csv");
 
 
 
@@ -191,12 +257,25 @@ public class TorcsData {
         //creating datasets
         MLDataSet acc_data = Data.make_data_set(double_array, "acceleration");
         MLDataSet brake_data = Data.make_data_set(double_array, "brake");
-        MLDataSet steering_data = Data.make_data_set(double_array, "steering");
+
+        //steering doesn't take speed variable
+        double[][] double_array_steer = Data.removeColumn(double_array, 3);
+
+        double[][] steering_data_boolean = Data.boolean_steering_set(double_array_steer);
+        double[][] steering_data_actual = Data.actual_steering(steering_data_boolean, double_array_steer);
+
+        MLDataSet steering_data = Data.make_data_set( double_array_steer , "steering");
+        MLDataSet steering_data_bool = Data.make_data_set( steering_data_boolean , "steering");
+        MLDataSet steering_data_when_true = Data.make_data_set(steering_data_actual, "steering");
 
         //saving datasets
         EncogUtility.saveEGB (new File("./train_data/trainingset_acc"), acc_data);
         EncogUtility.saveEGB (new File("./train_data/trainingset_brake"), brake_data);
+
         EncogUtility.saveEGB (new File("./train_data/trainingset_steering"), steering_data);
+        EncogUtility.saveEGB (new File("./train_data/trainingset_steering_boolean"), steering_data_bool);
+        EncogUtility.saveEGB (new File("./train_data/trainingset_steering_when_true"), steering_data_when_true);
+        //EncogUtility.saveEGB (new File("./train_data/trainingset_steering"), steering_data);
 
         System.out.println(acc_data.getInputSize());
         System.out.println(acc_data.get(1));

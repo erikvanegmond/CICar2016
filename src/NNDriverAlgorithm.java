@@ -53,6 +53,7 @@ public class NNDriverAlgorithm extends AbstractAlgorithm {
 		 * Start with -human to race against the best found
 		 *
 		 */
+
         NNDriverAlgorithm algorithm = new NNDriverAlgorithm();
         DriversUtils.registerMemory(algorithm.getDriverClass());
         if (args.length > 0 && args[0].equals("-show")) {
@@ -70,6 +71,9 @@ public class NNDriverAlgorithm extends AbstractAlgorithm {
         } else {
             algorithm.run();
         }
+
+        System.exit(0);
     }
+
 
 }

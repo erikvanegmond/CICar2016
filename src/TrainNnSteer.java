@@ -23,20 +23,19 @@ public class TrainNnSteer {
         //create network
         //create network
         BasicNetwork network = new BasicNetwork () ;
-        network.addLayer(new BasicLayer(null,true,22));
-        //network.addLayer(new BasicLayer(new ActivationSigmoid() ,true, 30));
-        //network.addLayer(new BasicLayer(new ActivationSigmoid() ,true, 20));
+        network.addLayer(new BasicLayer(null,true,7));
+        network.addLayer(new BasicLayer(new ActivationSigmoid() ,true, 20));
+        //network.addLayer(new BasicLayer(new ActivationSigmoid() ,true, 10));
         network.addLayer(new BasicLayer(new ActivationTANH() ,true ,1));
         network.getStructure().finalizeStructure();
         network.reset();
 
         MLDataSet trainingSet = EncogUtility.loadEGB2Memory(new File("./train_data/trainingset_steering") );
-        System.out.println( trainingSet.get(381) );
 
         //create training object
         LevenbergMarquardtTraining train = new LevenbergMarquardtTraining(  network , trainingSet ) ;
 
-        EncogUtility.trainToError(network, trainingSet, 0.006);
+        EncogUtility.trainToError(network, trainingSet, 0.0048);
         EncogDirectoryPersistence.saveObject(new File("./trained_models/steer_NN"), network);
 
         System.out.println("Neural Network Results:");
@@ -44,6 +43,8 @@ public class TrainNnSteer {
             final MLData output = network.compute( pair.getInput () ) ;
             System.out.println("actual=" + output.getData(0) +  ", ideal=" + pair.getIdeal().getData(0) ) ;
         }
+
+        System.exit(0);
 
     }
 }

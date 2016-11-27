@@ -1,4 +1,5 @@
 import javafx.scene.paint.Stop;
+import org.encog.engine.network.activation.ActivationLinear;
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.MLDataPair;
@@ -19,12 +20,12 @@ public class TrainNnBrake {
 
         //create network
         BasicNetwork network = new BasicNetwork () ;
-        network.addLayer(new BasicLayer(null,true,22));
+        network.addLayer(new BasicLayer(null,true,8));
         network.addLayer(new BasicLayer(new ActivationSigmoid() ,true, 30));
-        network.addLayer(new BasicLayer(new ActivationSigmoid() ,false ,1));
+        network.addLayer(new BasicLayer(new ActivationLinear() ,false ,1));
 
         network.getStructure().finalizeStructure();
-
+        network.reset();
 
         MLDataSet trainingSet = EncogUtility.loadEGB2Memory(new File("./train_data/trainingset_brake") );
         System.out.println( trainingSet.get(381) );
@@ -32,7 +33,7 @@ public class TrainNnBrake {
         //create training object
         LevenbergMarquardtTraining train = new LevenbergMarquardtTraining(  network , trainingSet ) ;
 
-        EncogUtility.trainToError(network, trainingSet, 0.04);
+        EncogUtility.trainToError(network, trainingSet, 0.035);
         EncogDirectoryPersistence.saveObject(new File("./trained_models/brake_NN"), network);
 
         System.out.println("Neural Network Results:");
