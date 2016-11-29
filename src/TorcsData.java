@@ -184,12 +184,21 @@ public class TorcsData {
         double[][] ideal = new double[rows][1];
 
         //>>>>>>>>Randomize the order of the rows
-
         //making input data
-        for(int r=0; r<rows; r++){
-            //skip first 3 rows
-            for(int c=3; c <cols; c++){
-                input[r][c-3] = double_array[r][c] ;
+        if (target_variable.equals("targetAngle")){
+            for (int r = 0; r < rows; r++) {
+                //skip first 3 rows
+                for (int c = 1; c < 4; c++) {
+                    input[r][c - 1] = double_array[r][c];
+                }
+            }
+        }
+        else {
+            for (int r = 0; r < rows; r++) {
+                //skip first 3 rows
+                for (int c = 3; c < cols; c++) {
+                    input[r][c - 3] = double_array[r][c];
+                }
             }
         }
 
@@ -200,6 +209,8 @@ public class TorcsData {
             case "brake": target_column = 1;
                 break;
             case "steering": target_column = 2;
+                break;
+            case "targetAngle": target_column = 3;
                 break;
             default:
                 target_column = 0;
@@ -257,6 +268,7 @@ public class TorcsData {
         //creating datasets
         MLDataSet acc_data = Data.make_data_set(double_array, "acceleration");
         MLDataSet brake_data = Data.make_data_set(double_array, "brake");
+        MLDataSet targetAngle_data = Data.make_data_set(double_array, "targetAngle");
 
         //steering doesn't take speed variable
         double[][] double_array_steer = Data.removeColumn(double_array, 3);
@@ -271,7 +283,7 @@ public class TorcsData {
         //saving datasets
         EncogUtility.saveEGB (new File("./train_data/trainingset_acc"), acc_data);
         EncogUtility.saveEGB (new File("./train_data/trainingset_brake"), brake_data);
-
+        EncogUtility.saveEGB (new File("./train_data/trainingset_targetAngle"), targetAngle_data);
         EncogUtility.saveEGB (new File("./train_data/trainingset_steering"), steering_data);
         EncogUtility.saveEGB (new File("./train_data/trainingset_steering_boolean"), steering_data_bool);
         EncogUtility.saveEGB (new File("./train_data/trainingset_steering_when_true"), steering_data_when_true);
