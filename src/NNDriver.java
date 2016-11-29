@@ -1,5 +1,4 @@
 import cicontest.algorithm.abstracts.AbstractDriver;
-import cicontest.algorithm.abstracts.DriversUtils;
 import cicontest.torcs.controller.extras.ABS;
 import cicontest.torcs.controller.extras.AutomatedClutch;
 import cicontest.torcs.controller.extras.AutomatedGearbox;
@@ -8,8 +7,6 @@ import cicontest.torcs.genome.IGenome;
 import scr.Action;
 import scr.SensorModel;
 
-import javax.sound.midi.Soundbank;
-import javax.sound.sampled.BooleanControl;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -17,19 +14,25 @@ import java.io.ObjectInputStream;
 
 public class NNDriver extends AbstractDriver {
     NeuralNetworkWrapper accNN;
+    NeuralNetworkWrapper targetAngleNN;
     NeuralNetworkWrapper brakeNN;
     NeuralNetworkWrapper steerNN;
     RecoverAuto recover;
     double[][] min_max_array;
     int direction;
     Boolean on_road;
-    private float steerLock=(float) (0.785398 - 0.5);
+
+    /* Steering constants*/
+    public float steerLock=(float) (0.785398 -0.5 );
+    final float steerSensitivityOffset=(float) 75.0;
+    final float wheelSensitivityCoeff=1;
 
     public NNDriver() {
         initialize();
         accNN = new NeuralNetworkWrapper("./trained_models/acc_NN");
         brakeNN = new NeuralNetworkWrapper("./trained_models/brake_NN");
         steerNN = new NeuralNetworkWrapper("./trained_models/steer_NN");
+        targetAngleNN = new NeuralNetworkWrapper("./trained_models/targetAngle_NN");
         recover = new RecoverAuto();
         on_road = true;
         min_max_array = load_min_max("./train_data/min_max_array.mem");
@@ -139,6 +142,7 @@ public class NNDriver extends AbstractDriver {
         return output;
     }
 
+    @Override
     public double getSteering(SensorModel sensors) {
         double[] sensorArray = new double[7];
         //sensorArray[0] = sensors.getSpeed();
@@ -155,6 +159,23 @@ public class NNDriver extends AbstractDriver {
 
         double output = steerNN.getOutput(sensorArray);
         return output;
+    }
+
+
+    public double getSteering_wierd(SensorModel sensors){
+        // steering angle is compute by correcting the actual car angle w.r.t. to track
+        // axis [sensors.getAngle()] and to adjust car position w.r.t to middle of track [sensors.getTrackPos()*0.5]
+        double[] sensorArray = new double[2];
+        sensorArray[0] = sensors.getTrackPosition();
+        sensorArray[1] = sensors.getAngleToTrackAxis();
+        double targetAngle=targetAngleNN.getOutput(sensorArray);
+
+        // at high speed reduce the steering command to avoid loosing the control
+        if (sensors.getSpeed() > steerSensitivityOffset)
+            return (double) (targetAngle/(steerLock*(sensors.getSpeed()-steerSensitivityOffset)*wheelSensitivityCoeff));
+        else
+            return (targetAngle)/steerLock;
+
     }
 
 

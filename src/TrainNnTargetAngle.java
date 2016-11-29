@@ -20,8 +20,8 @@ public class TrainNnTargetAngle {
         //create network
         //create network
         BasicNetwork network = new BasicNetwork () ;
-        network.addLayer(new BasicLayer(null,true,7));
-        network.addLayer(new BasicLayer(new ActivationSigmoid() ,true, 20));
+        network.addLayer(new BasicLayer(null,true,2));
+        network.addLayer(new BasicLayer(new ActivationSigmoid() ,true, 10));
         //network.addLayer(new BasicLayer(new ActivationSigmoid() ,true, 10));
         network.addLayer(new BasicLayer(new ActivationTANH() ,true ,1));
         network.getStructure().finalizeStructure();
@@ -32,7 +32,7 @@ public class TrainNnTargetAngle {
         //create training object
         LevenbergMarquardtTraining train = new LevenbergMarquardtTraining(  network , trainingSet ) ;
 
-        EncogUtility.trainToError(network, trainingSet, 0.0048);
+        EncogUtility.trainToError(network, trainingSet, 0.028);
         EncogDirectoryPersistence.saveObject(new File("./trained_models/targetAngle_NN"), network);
 
         System.out.println("Neural Network Results:");

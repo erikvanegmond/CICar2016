@@ -177,23 +177,32 @@ public class TorcsData {
     }
 
     public MLDataSet make_data_set(double[][] double_array, String target_variable){
-        int rows = double_array.length;
-        int cols = double_array[0].length;
-        //cols - 3 since there are three target columns
-        double[][] input = new double[rows][ cols - 3 ];
-        double[][] ideal = new double[rows][1];
+        double[][] input;
+        double[][] ideal;
+        int rows;
+        int cols;
 
         //>>>>>>>>Randomize the order of the rows
         //making input data
         if (target_variable.equals("targetAngle")){
+            rows = double_array.length;
+            cols = 2;
+            //cols - 3 since there are three target columns
+            input = new double[rows][2];
+            ideal = new double[rows][1];
             for (int r = 0; r < rows; r++) {
                 //skip first 3 rows
-                for (int c = 1; c < 4; c++) {
+                for (int c = 1; c < 3; c++) {
                     input[r][c - 1] = double_array[r][c];
                 }
             }
         }
         else {
+            rows = double_array.length;
+            cols = double_array[0].length;
+            //cols - 3 since there are three target columns
+            input = new double[rows][ cols - 3 ];
+            ideal = new double[rows][1];
             for (int r = 0; r < rows; r++) {
                 //skip first 3 rows
                 for (int c = 3; c < cols; c++) {
@@ -246,11 +255,11 @@ public class TorcsData {
     public static void main(String[] args) {
 
         TorcsData Data = new TorcsData();
-
-        Data.make_arraylist( "./new_train_data/aalborg_zeroone.csv");
-        Data.make_arraylist( "./new_train_data/track_2_zeroone.csv");
-        Data.make_arraylist( "./new_train_data/track_3_zeroone.csv");
-        Data.make_arraylist( "./new_train_data/track_4_zerone.csv");
+        Data.make_arraylist( "./new_train_data/train_data_aalborg.csv");
+//        Data.make_arraylist( "./new_train_data/aalborg_zeroone.csv");
+//        Data.make_arraylist( "./new_train_data/track_2_zeroone.csv");
+//        Data.make_arraylist( "./new_train_data/track_3_zeroone.csv");
+//        Data.make_arraylist( "./new_train_data/track_4_zerone.csv");
         //Data.make_arraylist( "./new_train_data/forza_slow2.csv");
         //Data.make_arraylist( "./train_data/aalborg.csv");
         //Data.make_arraylist( "./train_data/f-speedway.csv");
@@ -289,8 +298,8 @@ public class TorcsData {
         EncogUtility.saveEGB (new File("./train_data/trainingset_steering_when_true"), steering_data_when_true);
         //EncogUtility.saveEGB (new File("./train_data/trainingset_steering"), steering_data);
 
-        System.out.println(acc_data.getInputSize());
-        System.out.println(acc_data.get(1));
+        System.out.println(targetAngle_data.getInputSize());
+        System.out.println(targetAngle_data.get(1));
 
 
 
