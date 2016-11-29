@@ -256,6 +256,10 @@ public class TorcsData {
 
         TorcsData Data = new TorcsData();
         Data.make_arraylist( "./new_train_data/train_data_aalborg.csv");
+        Data.make_arraylist( "./new_train_data/train_data_alpine1.csv");
+        Data.make_arraylist( "./new_train_data/train_data_brondehach.csv");
+        Data.make_arraylist( "./new_train_data/train_data_dirt1.csv");
+        Data.make_arraylist( "./new_train_data/train_data_E-track.csv");
 //        Data.make_arraylist( "./new_train_data/aalborg_zeroone.csv");
 //        Data.make_arraylist( "./new_train_data/track_2_zeroone.csv");
 //        Data.make_arraylist( "./new_train_data/track_3_zeroone.csv");
