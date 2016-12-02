@@ -21,6 +21,10 @@ public class NEATNetworkWrapper extends NetworkWrapper{
         network = (NEATNetwork) trainer.getCODEC().decode(population.getBestGenome());
     }
 
+    public NEATNetworkWrapper(NEATNetwork neatNetwork) {
+        network = neatNetwork;
+    }
+
     public static NEATPopulation loadGenome(String file) {
         PersistNEATPopulation persistNEATPopulation = new PersistNEATPopulation();
         try {

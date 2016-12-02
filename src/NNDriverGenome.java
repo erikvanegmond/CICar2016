@@ -1,3 +1,4 @@
+import org.encog.neural.neat.NEATNetwork;
 
 public class NNDriverGenome extends AbstractGenome {
     public NetworkWrapper network;
@@ -21,6 +22,10 @@ public class NNDriverGenome extends AbstractGenome {
 
     public NNDriverGenome(){
         this(Const.ALL_NN_FNAME);
+    }
+
+    public NNDriverGenome(NEATNetwork neatNetwork){
+        network = new NEATNetworkWrapper(neatNetwork);
     }
 }
 
