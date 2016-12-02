@@ -1,12 +1,7 @@
 import org.encog.ml.MLRegression;
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.basic.BasicMLData;
-import org.encog.neural.neat.NEATPopulation;
-import org.encog.neural.neat.PersistNEATPopulation;
 import scr.SensorModel;
-
-import java.io.FileInputStream;
-import java.io.IOException;
 
 /**
  * Created by erikv on 2-12-2016.
@@ -42,20 +37,6 @@ public abstract class NetworkWrapper {
     public double getTargetAngle(SensorModel sensors){
         double targetAngle=(sensors.getAngleToTrackAxis()-sensors.getTrackPosition()*0.5);
         return targetAngle;
-    }
-
-
-    public static NEATPopulation loadGenome(String file) {
-        PersistNEATPopulation persistNEATPopulation = new PersistNEATPopulation();
-        try {
-            FileInputStream input = new FileInputStream(file);
-            NEATPopulation population = (NEATPopulation) persistNEATPopulation.read(input);
-            input.close();
-            return population;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     public double getSteering() {
