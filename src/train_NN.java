@@ -11,6 +11,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import static com.sun.tools.javac.jvm.ByteCodes.pop;
+
 /**
  * Created by davidzomerdijk on 11/8/16.
  */
@@ -21,19 +23,24 @@ public class train_NN {
 
     public static void main(String[] args) {
 
-        int iterations = 10;
+        int iterations = 1000;
 
 
-        MLDataSet trainingSet = EncogUtility.loadEGB2Memory(new File("./train_data/trainingset_all") );
+        MLDataSet trainingSet = EncogUtility.loadEGB2Memory(new File("./train_data/trainingset_all"));
 
 
         System.out.println("Creating new NEAT population");
         //input count, output count, population size
         NEATPopulation pop;// = loadPop(Const.ALL_NN_FNAME);
-        pop = loadPop(Const.ALL_NN_FNAME);
-//        pop = new NEATPopulation(trainingSet.getInputSize(), trainingSet.getIdealSize(), 10);
-        pop.setInitialConnectionDensity(1.0);// not required, but speeds training
-        pop.reset();
+        boolean usepop = true;
+        if (usepop) {
+            pop = loadPop(Const.ALL_NN_FNAME);
+        } else {
+            pop = new NEATPopulation(trainingSet.getInputSize(), trainingSet.getIdealSize(), 10);
+            pop.setInitialConnectionDensity(1.0);// not required, but speeds training
+            pop.reset();
+        }
+
         EvolutionaryAlgorithm trainer = NEATUtil.constructNEATTrainer(pop, new TrainingSetScore(trainingSet));
 
         // Evolve the network
