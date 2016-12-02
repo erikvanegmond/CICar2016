@@ -158,7 +158,7 @@ public class NNDriver extends AbstractDriver {
             action.accelerate = 1;
         }
         action.brake = getBraking(sensors);
-        action.brake = getAcceleration(sensors);
+        action.accelerate = getAcceleration(sensors);
 
 
 //        System.out.println(sensors.getTrackPosition()) ;
