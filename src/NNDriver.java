@@ -17,10 +17,12 @@ public class NNDriver extends AbstractDriver {
     NeuralNetworkWrapper targetAngleNN;
     NeuralNetworkWrapper brakeNN;
     NeuralNetworkWrapper steerNN;
+    NEATNetworkWrapper allNN;
     RecoverAuto recover;
     double[][] min_max_array;
     int direction;
     Boolean on_road;
+
 
     /* Steering constants*/
     public float steerLock=(float) (0.785398 -0.5 );
@@ -28,11 +30,14 @@ public class NNDriver extends AbstractDriver {
     final float wheelSensitivityCoeff=1;
 
     public NNDriver() {
+        System.out.println("hello");
+
         initialize();
-        accNN = new NeuralNetworkWrapper("./trained_models/acc_NN");
-        brakeNN = new NeuralNetworkWrapper("./trained_models/brake_NN");
-        steerNN = new NeuralNetworkWrapper("./trained_models/steer_NN");
-        targetAngleNN = new NeuralNetworkWrapper("./trained_models/targetAngle_NN");
+//        accNN = new NeuralNetworkWrapper("./trained_models/acc_NN");
+//        brakeNN = new NeuralNetworkWrapper("./trained_models/brake_NN");
+//        steerNN = new NeuralNetworkWrapper("./trained_models/steer_NN");
+//        targetAngleNN = new NeuralNetworkWrapper("./trained_models/targetAngle_NN");
+        allNN = new NEATNetworkWrapper(Const.ALL_NN_FNAME);
         recover = new RecoverAuto();
         on_road = true;
         min_max_array = load_min_max("./train_data/min_max_array.mem");
@@ -105,80 +110,18 @@ public class NNDriver extends AbstractDriver {
 
     @Override
     public double getAcceleration(SensorModel sensors) {
-        double[] sensorArray = new double[8]; // new double[22];
-        sensorArray[0] = sensors.getSpeed();
-        sensorArray[1] = sensors.getTrackPosition();
-        sensorArray[2] = sensors.getAngleToTrackAxis();
-
-        sensorArray[3] = sensors.getTrackEdgeSensors()[4];
-        sensorArray[4] = sensors.getTrackEdgeSensors()[6];
-        sensorArray[5] = sensors.getTrackEdgeSensors()[9];
-        sensorArray[6] = sensors.getTrackEdgeSensors()[12];
-        sensorArray[7] = sensors.getTrackEdgeSensors()[14];
-        //System.arraycopy(sensors.getTrackEdgeSensors(), 0, sensorArray, 3, 19);
-
-        double output = accNN.getOutput(sensorArray);
-
-        return output;
+        return allNN.getAcceleration();
 
     }
 
     public double getBraking(SensorModel sensors) {
-        double[] sensorArray = new double[8];
-        sensorArray[0] = sensors.getSpeed();
-        sensorArray[1] = sensors.getTrackPosition();
-        sensorArray[2] = sensors.getAngleToTrackAxis();
-
-        sensorArray[3] = sensors.getTrackEdgeSensors()[4];
-        sensorArray[4] = sensors.getTrackEdgeSensors()[6];
-        sensorArray[5] = sensors.getTrackEdgeSensors()[9];
-        sensorArray[6] = sensors.getTrackEdgeSensors()[12];
-        sensorArray[7] = sensors.getTrackEdgeSensors()[14];
-        //System.arraycopy(sensors.getTrackEdgeSensors(), 0, sensorArray, 3, 19);
-        //normalize the input since the NN is trained on normalized data.
-        sensorArray= normalize_array( sensorArray );
-        double output = brakeNN.getOutput(sensorArray);
-
-        return output;
+        return allNN.getBraking();
     }
 
     @Override
-    public double getSteering(SensorModel sensors) {
-        double[] sensorArray = new double[7];
-        //sensorArray[0] = sensors.getSpeed();
-        sensorArray[0] = sensors.getTrackPosition();
-        sensorArray[1] = sensors.getAngleToTrackAxis();
-
-        sensorArray[2] = sensors.getTrackEdgeSensors()[4];
-        sensorArray[3] = sensors.getTrackEdgeSensors()[6];
-        sensorArray[4] = sensors.getTrackEdgeSensors()[9];
-        sensorArray[5] = sensors.getTrackEdgeSensors()[12];
-        sensorArray[6] = sensors.getTrackEdgeSensors()[14];
-
-        //System.arraycopy(sensors.getTrackEdgeSensors(), 0, sensorArray, 3, 19);
-
-        double output = steerNN.getOutput(sensorArray);
-        return output;
+    public double getSteering(SensorModel sensors){
+        return allNN.getSteering();
     }
-
-
-    public double getSteering_wierd(SensorModel sensors){
-        // steering angle is compute by correcting the actual car angle w.r.t. to track
-        // axis [sensors.getAngle()] and to adjust car position w.r.t to middle of track [sensors.getTrackPos()*0.5]
-        double[] sensorArray = new double[2];
-        sensorArray[0] = sensors.getTrackPosition();
-        sensorArray[1] = sensors.getAngleToTrackAxis();
-        double targetAngle=targetAngleNN.getOutput(sensorArray);
-
-        // at high speed reduce the steering command to avoid loosing the control
-        if (sensors.getSpeed() > steerSensitivityOffset)
-            return (double) (targetAngle/(steerLock*(sensors.getSpeed()-steerSensitivityOffset)*wheelSensitivityCoeff));
-        else
-            return (targetAngle)/steerLock;
-
-    }
-
-
 
     @Override
     public String getDriverName() {
@@ -208,27 +151,24 @@ public class NNDriver extends AbstractDriver {
         if (action == null) {
             action = new Action();
         }
-        //process whether we all stuck or not
-
-
-        System.out.print("am I on track?: ");
-        System.out.println(sensors.getTrackEdgeSensors()[18] );
-
+        allNN.updateActions(sensors);
         action.steering = getSteering(sensors);
 
         if(sensors.getSpeed() < 61){
             action.accelerate = 1;
         }
-        //action.accelerate = getAcceleration(sensors);
         action.brake = getBraking(sensors);
+        action.brake = getAcceleration(sensors);
 
 
-        System.out.println(sensors.getTrackPosition()) ;
-        System.out.println("--------------" + getDriverName() + "--------------");
-        System.out.println("Steering: " + action.steering);
-        System.out.println("Acceleration: " + action.accelerate);
-        System.out.println("Brake: " + action.brake);
-        System.out.println("-----------------------------------------------");
+//        System.out.println(sensors.getTrackPosition()) ;
+//        System.out.println("--------------" + getDriverName() + "--------------");
+//        System.out.println("Steering: " + action.steering);
+//        System.out.println("Acceleration: " + action.accelerate);
+//        System.out.println("Brake: " + action.brake);
+//        System.out.println("-----------------------------------------------");
         return action;
     }
+
+
 }

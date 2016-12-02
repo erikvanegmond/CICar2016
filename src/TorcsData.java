@@ -202,7 +202,11 @@ public class TorcsData {
             cols = double_array[0].length;
             //cols - 3 since there are three target columns
             input = new double[rows][ cols - 3 ];
-            ideal = new double[rows][1];
+            if(target_variable.equals("all")){
+                ideal = new double[rows][3];
+            }else{
+                ideal = new double[rows][1];
+            }
             for (int r = 0; r < rows; r++) {
                 //skip first 3 rows
                 for (int c = 3; c < cols; c++) {
@@ -221,16 +225,25 @@ public class TorcsData {
                 break;
             case "targetAngle": target_column = 3;
                 break;
+            case "all": target_column = -1;
+                break;
             default:
                 target_column = 0;
                 System.out.println("error: wrong target variable input.");
         }
 
         //creating ideal data
-        for(int r=0; r<rows; r++){
-            ideal[r][0] = double_array[r][target_column];
+        if (target_column >= 0) {
+            for (int r = 0; r < rows; r++) {
+                ideal[r][0] = double_array[r][target_column];
+            }
+        }else{
+            for (int r = 0; r < rows; r++) {
+                for (int i = 0; i < 3; i++) {
+                    ideal[r][i] = double_array[r][i];
+                }
+            }
         }
-
         MLDataSet training_set = new BasicMLDataSet(input, ideal);
         return training_set;
     }
@@ -280,6 +293,7 @@ public class TorcsData {
 
         //creating datasets
         MLDataSet acc_data = Data.make_data_set(double_array, "acceleration");
+        MLDataSet all_data = Data.make_data_set(double_array, "all");
         MLDataSet brake_data = Data.make_data_set(double_array, "brake");
         MLDataSet targetAngle_data = Data.make_data_set(double_array, "targetAngle");
 
@@ -295,6 +309,7 @@ public class TorcsData {
 
         //saving datasets
         EncogUtility.saveEGB (new File("./train_data/trainingset_acc"), acc_data);
+        EncogUtility.saveEGB (new File("./train_data/trainingset_all"), all_data);
         EncogUtility.saveEGB (new File("./train_data/trainingset_brake"), brake_data);
         EncogUtility.saveEGB (new File("./train_data/trainingset_targetAngle"), targetAngle_data);
         EncogUtility.saveEGB (new File("./train_data/trainingset_steering"), steering_data);
@@ -302,8 +317,8 @@ public class TorcsData {
         EncogUtility.saveEGB (new File("./train_data/trainingset_steering_when_true"), steering_data_when_true);
         //EncogUtility.saveEGB (new File("./train_data/trainingset_steering"), steering_data);
 
-        System.out.println(targetAngle_data.getInputSize());
-        System.out.println(targetAngle_data.get(1));
+        System.out.println(all_data.getInputSize());
+        System.out.println(all_data.getIdealSize());
 
 
 

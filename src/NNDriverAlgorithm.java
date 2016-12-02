@@ -4,6 +4,7 @@ import cicontest.torcs.controller.Driver;
 import race.TorcsConfiguration;
 
 import java.io.File;
+import java.util.Arrays;
 
 public class NNDriverAlgorithm extends AbstractAlgorithm {
 
@@ -28,7 +29,8 @@ public class NNDriverAlgorithm extends AbstractAlgorithm {
             race.laps = 1;
 
             //for speedup set withGUI to false
-            results = race.runRace(drivers, true);
+            results = race.runRace(drivers, false);
+            System.out.println(Arrays.toString(results));
 
 
 

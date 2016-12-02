@@ -1,19 +1,19 @@
-import org.encog.engine.network.activation.ActivationSigmoid;
-import org.encog.ml.data.MLData;
-import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
-import org.encog.neural.networks.BasicNetwork;
-import org.encog.neural.networks.layers.BasicLayer;
-import org.encog.neural.networks.training.lma.LevenbergMarquardtTraining;
-import org.encog.persist.EncogDirectoryPersistence;
+import org.encog.ml.ea.train.EvolutionaryAlgorithm;
+import org.encog.neural.neat.NEATPopulation;
+import org.encog.neural.neat.NEATUtil;
+import org.encog.neural.neat.PersistNEATPopulation;
+import org.encog.neural.networks.training.TrainingSetScore;
 import org.encog.util.simple.EncogUtility;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
  * Created by davidzomerdijk on 11/8/16.
  */
-
 
 
 public class train_NN {
@@ -21,30 +21,59 @@ public class train_NN {
 
     public static void main(String[] args) {
 
-        //create network
-        BasicNetwork network = new BasicNetwork () ;
-        network.addLayer(new BasicLayer(null,true,22));
-        network.addLayer(new BasicLayer(new ActivationSigmoid() ,true, 30));
-        network.addLayer(new BasicLayer(new ActivationSigmoid() ,false ,1));
-        network.getStructure().finalizeStructure();
+        int iterations = 10;
 
-        MLDataSet trainingSet = EncogUtility.loadEGB2Memory(new File("./train_data/trainingset_acc") );
-        System.out.println( trainingSet.get(381) );
 
-        //create training object
-        LevenbergMarquardtTraining train = new LevenbergMarquardtTraining(  network , trainingSet ) ;
+        MLDataSet trainingSet = EncogUtility.loadEGB2Memory(new File("./train_data/trainingset_all") );
 
-        EncogUtility.trainToError(network, trainingSet, 0.06);
-        EncogDirectoryPersistence.saveObject(new File("./trained_models/acc_NN"), network);
 
-        System.out.println("Neural Network Results:");
-        for (MLDataPair pair : trainingSet ) {
-            final MLData output = network.compute( pair.getInput () ) ;
-            System.out.println("actual=" + output.getData(0) +  ", ideal=" + pair.getIdeal().getData(0) ) ;
+        System.out.println("Creating new NEAT population");
+        //input count, output count, population size
+        NEATPopulation pop;// = loadPop(Const.ALL_NN_FNAME);
+        pop = loadPop(Const.ALL_NN_FNAME);
+//        pop = new NEATPopulation(trainingSet.getInputSize(), trainingSet.getIdealSize(), 10);
+        pop.setInitialConnectionDensity(1.0);// not required, but speeds training
+        pop.reset();
+        EvolutionaryAlgorithm trainer = NEATUtil.constructNEATTrainer(pop, new TrainingSetScore(trainingSet));
+
+        // Evolve the network
+        for (int i = 0; i < iterations; i++) {
+            trainer.iteration();
+            System.out.println("Epoch #" + trainer.getIteration()
+                    + ", Error:" + trainer.getError()
+                    + ", Species:" + pop.getSpecies().size()
+                    + ", Pop: " + pop.getPopulationSize());
         }
-
-
-
+        System.out.println("Training finished");
+        savePop(pop);
     }
 
+    private static NEATPopulation loadPop(String file) {
+        PersistNEATPopulation persistNEATPopulation = new PersistNEATPopulation();
+        try {
+            FileInputStream input = new FileInputStream(file);
+            NEATPopulation population = (NEATPopulation) persistNEATPopulation.read(input);
+            input.close();
+            return population;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private static void savePop(NEATPopulation population) {
+        PersistNEATPopulation persistNEATPopulation = new PersistNEATPopulation();
+        try {
+            System.out.println("Saving at: " + Const.ALL_NN_FNAME);
+            FileOutputStream output = new FileOutputStream(Const.ALL_NN_FNAME);
+            persistNEATPopulation.save(output, population);
+            output.close();
+            System.out.println("Saving done");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 }
+

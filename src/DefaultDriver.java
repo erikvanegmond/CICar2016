@@ -143,7 +143,6 @@ public class DefaultDriver extends AbstractDriver{
 	public double getTargetAngle(SensorModel sensors){
 		double targetAngle=(sensors.getAngleToTrackAxis()-sensors.getTrackPosition()*0.5);
 		return targetAngle;
-
 	}
 
 	@Override
