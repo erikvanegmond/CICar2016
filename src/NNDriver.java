@@ -13,16 +13,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 
 public class NNDriver extends AbstractDriver {
-    NeuralNetworkWrapper accNN;
-    NeuralNetworkWrapper targetAngleNN;
-    NeuralNetworkWrapper brakeNN;
-    NeuralNetworkWrapper steerNN;
-    NEATNetworkWrapper allNN;
     RecoverAuto recover;
     double[][] min_max_array;
     int direction;
     Boolean on_road;
-
+    NNDriverGenome genome;
 
     /* Steering constants*/
     public float steerLock=(float) (0.785398 -0.5 );
@@ -33,19 +28,12 @@ public class NNDriver extends AbstractDriver {
         System.out.println("hello");
 
         initialize();
-//        accNN = new NeuralNetworkWrapper("./trained_models/acc_NN");
-//        brakeNN = new NeuralNetworkWrapper("./trained_models/brake_NN");
-//        steerNN = new NeuralNetworkWrapper("./trained_models/steer_NN");
-//        targetAngleNN = new NeuralNetworkWrapper("./trained_models/targetAngle_NN");
-        allNN = new NEATNetworkWrapper(Const.ALL_NN_FNAME);
         recover = new RecoverAuto();
         on_road = true;
         min_max_array = load_min_max("./train_data/min_max_array.mem");
         direction = 0; // remembers last directions
-//        neuralNetwork = neuralNetwork.loadGenome();
 
     }
-
 
     private void initialize() {
         this.enableExtras(new AutomatedClutch());
@@ -101,8 +89,8 @@ public class NNDriver extends AbstractDriver {
 
     @Override
     public void loadGenome(IGenome genome) {
-        if (genome instanceof DefaultDriverGenome) {
-            DefaultDriverGenome myGenome = (DefaultDriverGenome) genome;
+        if (genome instanceof AbstractGenome) {
+            this.genome = (NNDriverGenome) genome;
         } else {
             System.err.println("Invalid Genome assigned");
         }
@@ -110,17 +98,17 @@ public class NNDriver extends AbstractDriver {
 
     @Override
     public double getAcceleration(SensorModel sensors) {
-        return allNN.getAcceleration();
+        return genome.network.getAcceleration();
 
     }
 
     public double getBraking(SensorModel sensors) {
-        return allNN.getBraking();
+        return genome.network.getBraking();
     }
 
     @Override
     public double getSteering(SensorModel sensors){
-        return allNN.getSteering();
+        return genome.network.getSteering();
     }
 
     @Override
@@ -151,7 +139,7 @@ public class NNDriver extends AbstractDriver {
         if (action == null) {
             action = new Action();
         }
-        allNN.updateActions(sensors);
+        genome.network.updateActions(sensors);
         action.steering = getSteering(sensors);
 
         if(sensors.getSpeed() < 61){

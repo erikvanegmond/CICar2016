@@ -19,7 +19,6 @@ public abstract class NetworkWrapper {
         double[] sensorArray = makeSensorArray(sensors);
         MLData mlData = new BasicMLData(sensorArray);
         MLData result = network.compute(mlData);
-        System.out.println(result.toString());
         actions=result.getData();
     }
 

@@ -32,10 +32,6 @@ public class NNDriverAlgorithm extends AbstractAlgorithm {
             results = race.runRace(drivers, false);
             System.out.println(Arrays.toString(results));
 
-
-
-            // Save genome/nn
-           // DriversUtils.storeGenome(drivers[0]);
         }
         // create a checkpoint this allows you to continue this run later
         DriversUtils.createCheckpoint(this);

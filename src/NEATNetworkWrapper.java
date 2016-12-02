@@ -16,9 +16,6 @@ public class NEATNetworkWrapper extends NetworkWrapper{
         NEATPopulation population = loadGenome(filePath);
         TrainEA trainer = NEATUtil.constructNEATTrainer(population, new TrainingSetScore(EncogUtility.loadEGB2Memory(new File(Const.ALL_TRAIN_SET) )));
         network = (NEATNetwork) trainer.getCODEC().decode(population.getBestGenome());
-        long startTime = System.currentTimeMillis();
-        long estimatedTime = System.currentTimeMillis() - startTime;
-        System.out.println("loaded network"+estimatedTime);
     }
 
 }
