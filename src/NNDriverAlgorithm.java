@@ -1,18 +1,16 @@
 import cicontest.algorithm.abstracts.AbstractAlgorithm;
 import cicontest.algorithm.abstracts.DriversUtils;
 import cicontest.torcs.controller.Driver;
-import cicontest.torcs.race.RaceResults;
 import race.TorcsConfiguration;
 
 import java.io.File;
-import java.util.Arrays;
 
 public class NNDriverAlgorithm extends AbstractAlgorithm {
 
     private static final long serialVersionUID = 654963126362653L;
 
     NNDriverGenome[] drivers = new NNDriverGenome[1];
-    RaceResults results = new RaceResults();
+    int[] results = new int[1];
 
     public Class<? extends Driver> getDriverClass() {
         return NNDriver.class;

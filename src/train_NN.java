@@ -11,8 +11,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import static com.sun.tools.javac.jvm.ByteCodes.pop;
-
 /**
  * Created by davidzomerdijk on 11/8/16.
  */

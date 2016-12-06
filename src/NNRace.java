@@ -19,14 +19,14 @@ public class NNRace extends AbstractRace {
 	}
 
 	
-	public RaceResults runRace(NNDriverGenome[] drivers, boolean withGUI){
+	public int[] runRace(NNDriverGenome[] drivers, boolean withGUI){
 		int size = Math.min(10, drivers.length);
 		NNDriver[] driversList = new NNDriver[size];
 		for(int i=0; i<size; i++){
 			driversList[i] = new NNDriver();
 			driversList[i].loadGenome(drivers[i]);
 		}
-		return runResultRace(driversList, withGUI, true);
+		return runRace(driversList, withGUI, true);
 	}
 
 	
