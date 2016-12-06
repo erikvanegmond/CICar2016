@@ -1,5 +1,5 @@
-import org.encog.engine.network.activation.ActivationLinear;
 import org.encog.engine.network.activation.ActivationSigmoid;
+import org.encog.engine.network.activation.ActivationTANH;
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
@@ -19,8 +19,10 @@ public class TrainNnAcc {
 
         //create network
         BasicNetwork network = new BasicNetwork () ;
-        network.addLayer(new BasicLayer(null,true,8));
-        network.addLayer(new BasicLayer(new ActivationSigmoid() ,true, 30));
+        network.addLayer(new BasicLayer(null,true,4));
+        network.addLayer(new BasicLayer(new ActivationSigmoid() ,true, 40));
+        //network.addLayer(new BasicLayer(new ActivationSigmoid() ,true, 40));
+
         network.addLayer(new BasicLayer(new ActivationSigmoid(),false ,1));
         network.getStructure().finalizeStructure();
         network.reset();
@@ -31,7 +33,7 @@ public class TrainNnAcc {
         //create training object
         LevenbergMarquardtTraining train = new LevenbergMarquardtTraining(  network , trainingSet ) ;
 
-        EncogUtility.trainToError(network, trainingSet, 0.07);
+        EncogUtility.trainToError(network, trainingSet, 0.11); //0.11
         EncogDirectoryPersistence.saveObject(new File("./trained_models/acc_NN"), network);
 
         System.out.println("Neural Network Results:");

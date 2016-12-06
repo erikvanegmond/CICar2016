@@ -8,6 +8,7 @@ import org.encog.util.simple.EncogUtility;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created by davidzomerdijk on 11/19/16.
@@ -160,6 +161,17 @@ public class TorcsData {
         return double_array;
     }
 
+
+    public double[][] addNoise(double[][] array ,double stdv, double mean, int column){
+        Random r = new Random();
+        for(int i = 0; i<array.length;i++){
+            array[i][0] = array[i][column] + r.nextGaussian()*stdv+mean;
+        }
+
+        return array;
+    }
+
+
     //Stores an Array
     public void storeArray(double[][] myArray, String inFile) {
         ObjectOutputStream out = null;
@@ -177,41 +189,19 @@ public class TorcsData {
     }
 
     public MLDataSet make_data_set(double[][] double_array, String target_variable){
-        double[][] input;
-        double[][] ideal;
-        int rows;
-        int cols;
+        int rows = double_array.length;
+        int cols = double_array[0].length;
+        //cols - 3 since there are three target columns
+        double[][] input = new double[rows][ cols - 3 ];
+        double[][] ideal = new double[rows][1];
 
         //>>>>>>>>Randomize the order of the rows
+
         //making input data
-        if (target_variable.equals("targetAngle")){
-            rows = double_array.length;
-            cols = 2;
-            //cols - 3 since there are three target columns
-            input = new double[rows][2];
-            ideal = new double[rows][1];
-            for (int r = 0; r < rows; r++) {
-                //skip first 3 rows
-                for (int c = 1; c < 3; c++) {
-                    input[r][c - 1] = double_array[r][c];
-                }
-            }
-        }
-        else {
-            rows = double_array.length;
-            cols = double_array[0].length;
-            //cols - 3 since there are three target columns
-            input = new double[rows][ cols - 3 ];
-            if(target_variable.equals("all")){
-                ideal = new double[rows][3];
-            }else{
-                ideal = new double[rows][1];
-            }
-            for (int r = 0; r < rows; r++) {
-                //skip first 3 rows
-                for (int c = 3; c < cols; c++) {
-                    input[r][c - 3] = double_array[r][c];
-                }
+        for(int r=0; r<rows; r++){
+            //skip first 3 rows
+            for(int c=3; c <cols; c++){
+                input[r][c-3] = double_array[r][c] ;
             }
         }
 
@@ -223,27 +213,16 @@ public class TorcsData {
                 break;
             case "steering": target_column = 2;
                 break;
-            case "targetAngle": target_column = 3;
-                break;
-            case "all": target_column = -1;
-                break;
             default:
                 target_column = 0;
                 System.out.println("error: wrong target variable input.");
         }
 
         //creating ideal data
-        if (target_column >= 0) {
-            for (int r = 0; r < rows; r++) {
-                ideal[r][0] = double_array[r][target_column];
-            }
-        }else{
-            for (int r = 0; r < rows; r++) {
-                for (int i = 0; i < 3; i++) {
-                    ideal[r][i] = double_array[r][i];
-                }
-            }
+        for(int r=0; r<rows; r++){
+            ideal[r][0] = double_array[r][target_column];
         }
+
         MLDataSet training_set = new BasicMLDataSet(input, ideal);
         return training_set;
     }
@@ -268,59 +247,106 @@ public class TorcsData {
     public static void main(String[] args) {
 
         TorcsData Data = new TorcsData();
-        Data.make_arraylist( "./new_train_data/train_data_aalborg.csv");
-        Data.make_arraylist( "./new_train_data/train_data_alpine1.csv");
-        Data.make_arraylist( "./new_train_data/train_data_brondehach.csv");
-        Data.make_arraylist( "./new_train_data/train_data_dirt1.csv");
-        Data.make_arraylist( "./new_train_data/train_data_E-track.csv");
+
 //        Data.make_arraylist( "./new_train_data/aalborg_zeroone.csv");
 //        Data.make_arraylist( "./new_train_data/track_2_zeroone.csv");
 //        Data.make_arraylist( "./new_train_data/track_3_zeroone.csv");
 //        Data.make_arraylist( "./new_train_data/track_4_zerone.csv");
         //Data.make_arraylist( "./new_train_data/forza_slow2.csv");
-        //Data.make_arraylist( "./train_data/aalborg.csv");
-        //Data.make_arraylist( "./train_data/f-speedway.csv");
-        //Data.make_arraylist( "./train_data/alpine-1.csv");
-        //Data.make_arraylist( "./new_train_data/track_1.csv");
-        //Data.make_arraylist( "./new_train_data/track_2.csv");
-        //Data.make_arraylist( "./new_train_data/track_3.csv");
-        //Data.make_arraylist( "./new_train_data/track_4.csv");
+//        Data.make_arraylist( "./train_data/aalborg.csv");
+//        Data.make_arraylist( "./train_data/f-speedway.csv");
+//        Data.make_arraylist( "./train_data/alpine-1.csv");
+        //Data.make_arraylist( "./new_train_data/aalborg_default.csv");
+        //Data.make_arraylist( "./new_train_data/alpine_1_default.csv");
+        //Data.make_arraylist( "./new_train_data/extra_data_default.csv");
+        //Data.make_arraylist( "./new_train_data/one_back_default.csv");
+        //Data.make_arraylist( "./new_train_data/oval_default.csv");
+        Data.make_arraylist( "./new_train_data/train_data_aalborg.csv");
+        Data.make_arraylist( "./new_train_data/train_data_alpine1.csv");
+        Data.make_arraylist( "./new_train_data/train_data_dirt1.csv");
+        Data.make_arraylist( "./new_train_data/train_data_dirt3.csv");
+        Data.make_arraylist( "./new_train_data/train_data_dirt6.csv");
+        Data.make_arraylist( "./new_train_data/train_data_E-track.csv");
+        Data.make_arraylist( "./new_train_data/train_data_brondehach.csv");
+
+
 
 
 
         double [][] double_array = Data.make_double_array(); //here we put everything in a double[][]
-        double_array = Data.make_normalized_array(double_array, 3); //here we normalize the data
+        //double_array = Data.make_normalized_array(double_array, 3); //here we normalize the data
 
-        //creating datasets
-        MLDataSet acc_data = Data.make_data_set(double_array, "acceleration");
-        MLDataSet all_data = Data.make_data_set(double_array, "all");
-        MLDataSet brake_data = Data.make_data_set(double_array, "brake");
-        MLDataSet targetAngle_data = Data.make_data_set(double_array, "targetAngle");
 
+
+
+
+        // ----------------------------------------------------
+        // Steerdata
+        // ----------------------------------------------------
         //steering doesn't take speed variable
         double[][] double_array_steer = Data.removeColumn(double_array, 3);
+        double_array_steer = Data.removeColumn(double_array_steer, 3);
+        double_array_steer = Data.removeColumn(double_array_steer, 5);
+        double_array_steer = Data.removeColumn(double_array_steer, 5);
+        double_array_steer = Data.removeColumn(double_array_steer, 5);
+        double_array_steer = Data.removeColumn(double_array_steer, 5);
+        double_array_steer = Data.removeColumn(double_array_steer, 5);
+        //double_array_steer = Data.removeColumn(double_array_steer, 3);
 
-        double[][] steering_data_boolean = Data.boolean_steering_set(double_array_steer);
-        double[][] steering_data_actual = Data.actual_steering(steering_data_boolean, double_array_steer);
+        //adding noise to avoid overfit;
+        double_array_steer = Data.addNoise(double_array_steer, 0.1, 0, 2);
 
         MLDataSet steering_data = Data.make_data_set( double_array_steer , "steering");
-        MLDataSet steering_data_bool = Data.make_data_set( steering_data_boolean , "steering");
-        MLDataSet steering_data_when_true = Data.make_data_set(steering_data_actual, "steering");
 
-        //saving datasets
-        EncogUtility.saveEGB (new File("./train_data/trainingset_acc"), acc_data);
-        EncogUtility.saveEGB (new File("./train_data/trainingset_all"), all_data);
-        EncogUtility.saveEGB (new File("./train_data/trainingset_brake"), brake_data);
-        EncogUtility.saveEGB (new File("./train_data/trainingset_targetAngle"), targetAngle_data);
+
         EncogUtility.saveEGB (new File("./train_data/trainingset_steering"), steering_data);
-        EncogUtility.saveEGB (new File("./train_data/trainingset_steering_boolean"), steering_data_bool);
-        EncogUtility.saveEGB (new File("./train_data/trainingset_steering_when_true"), steering_data_when_true);
+
+        //-------------------------------------------------------
+        // acc data
+        // ------------------------------------------------------
+        double[][] double_array_acc = Data.removeColumn(double_array, 4);
+        double_array_acc = Data.removeColumn(double_array_acc, 4);
+        double_array_acc = Data.removeColumn(double_array_acc, 4);
+        double_array_acc = Data.removeColumn(double_array_acc, 4);
+        double_array_acc = Data.removeColumn(double_array_acc, 7);
+
+        //creating datasets
+        MLDataSet acc_data = Data.make_data_set(double_array_acc, "acceleration");
+
+        EncogUtility.saveEGB (new File("./train_data/trainingset_acc"), acc_data);
+
+
+        //-------------------------------------------------------
+        // brake data
+        // ------------------------------------------------------
+        double[][] double_array_brake = Data.removeColumn(double_array, 4);
+        double_array_brake = Data.removeColumn(double_array_brake, 4);
+        double_array_brake = Data.removeColumn(double_array_brake, 4);
+        double_array_brake = Data.removeColumn(double_array_brake, 4);
+        double_array_brake = Data.removeColumn(double_array_brake, 4);
+        double_array_brake = Data.removeColumn(double_array_brake, 6);
+        double_array_brake = Data.removeColumn(double_array_brake, 6);
+
+        MLDataSet brake_data = Data.make_data_set(double_array_brake, "brake");
+
+        EncogUtility.saveEGB (new File("./train_data/trainingset_brake"), brake_data);
+
+
+
+
+
+
         //EncogUtility.saveEGB (new File("./train_data/trainingset_steering"), steering_data);
 
-        System.out.println(all_data.getInputSize());
-        System.out.println(all_data.getIdealSize());
+        System.out.println(steering_data.getInputSize());
+        System.out.println(brake_data.get(1));
+        System.out.println(brake_data.get(2));
 
-
+        double desiredStandardDeviation = 0.2;
+        double desiredMean = 0;
+        Random r = new Random();
+        double mySample = r.nextGaussian()*desiredStandardDeviation+desiredMean;
+        System.out.println(mySample);
 
     }
 

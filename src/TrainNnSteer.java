@@ -1,4 +1,3 @@
-import org.encog.engine.network.activation.ActivationLinear;
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.engine.network.activation.ActivationTANH;
 import org.encog.ml.data.MLData;
@@ -7,8 +6,6 @@ import org.encog.ml.data.MLDataSet;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.lma.LevenbergMarquardtTraining;
-import org.encog.neural.networks.training.propagation.back.Backpropagation;
-import org.encog.neural.networks.training.propagation.manhattan.ManhattanPropagation;
 import org.encog.persist.EncogDirectoryPersistence;
 import org.encog.util.simple.EncogUtility;
 
@@ -23,7 +20,7 @@ public class TrainNnSteer {
         //create network
         //create network
         BasicNetwork network = new BasicNetwork () ;
-        network.addLayer(new BasicLayer(null,true,7));
+        network.addLayer(new BasicLayer(null,true,2));
         network.addLayer(new BasicLayer(new ActivationSigmoid() ,true, 20));
         //network.addLayer(new BasicLayer(new ActivationSigmoid() ,true, 10));
         network.addLayer(new BasicLayer(new ActivationTANH() ,true ,1));
@@ -35,7 +32,7 @@ public class TrainNnSteer {
         //create training object
         LevenbergMarquardtTraining train = new LevenbergMarquardtTraining(  network , trainingSet ) ;
 
-        EncogUtility.trainToError(network, trainingSet, 0.0048);
+        EncogUtility.trainToError(network, trainingSet, 0.0013);
         EncogDirectoryPersistence.saveObject(new File("./trained_models/steer_NN"), network);
 
         System.out.println("Neural Network Results:");
