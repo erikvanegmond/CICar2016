@@ -159,7 +159,6 @@ public class NNDriver extends AbstractDriver {
 //        sensorArray[6] = sensors.getTrackEdgeSensors()[9];
 //        sensorArray[7] = sensors.getTrackEdgeSensors()[12];
 //        sensorArray[8] = sensors.getTrackEdgeSensors()[14];
-
         //System.arraycopy(sensors.getTrackEdgeSensors(), 0, sensorArray, 3, 19);
 
         double output = steerNN.getOutput(sensorArray);
