@@ -193,7 +193,12 @@ public class TorcsData {
         int cols = double_array[0].length;
         //cols - 3 since there are three target columns
         double[][] input = new double[rows][ cols - 3 ];
-        double[][] ideal = new double[rows][1];
+        double[][] ideal;
+        if(!target_variable.equals("all")) {
+            ideal = new double[rows][1];
+        }else{
+            ideal = new double[rows][3];
+        }
 
         //>>>>>>>>Randomize the order of the rows
 
@@ -213,14 +218,25 @@ public class TorcsData {
                 break;
             case "steering": target_column = 2;
                 break;
+            case "all":
+                target_column = -1;
+                break;
             default:
                 target_column = 0;
                 System.out.println("error: wrong target variable input.");
         }
 
         //creating ideal data
-        for(int r=0; r<rows; r++){
-            ideal[r][0] = double_array[r][target_column];
+        if(target_column >= 0) {
+            for (int r = 0; r < rows; r++) {
+                ideal[r][0] = double_array[r][target_column];
+            }
+        }else{
+            for (int r = 0; r < rows; r++) {
+                for(int c=0; c<3; c++) {
+                    ideal[r][c] = double_array[r][c];
+                }
+            }
         }
 
         MLDataSet training_set = new BasicMLDataSet(input, ideal);
@@ -332,21 +348,33 @@ public class TorcsData {
         EncogUtility.saveEGB (new File("./train_data/trainingset_brake"), brake_data);
 
 
+        //-------------------------------------------------------
+        // brake data
+        // ------------------------------------------------------
+        double[][] double_array_all = double_array;//Data.removeColumn(double_array, 4);
+//        double_array_all = Data.removeColumn(double_array_all, 4);
+//        double_array_all = Data.removeColumn(double_array_all, 4);
+//        double_array_all = Data.removeColumn(double_array_all, 4);
+//        double_array_all = Data.removeColumn(double_array_all, 4);
+//        double_array_all = Data.removeColumn(double_array_all, 6);
+//        double_array_all = Data.removeColumn(double_array_all, 6);
 
+        MLDataSet all_data = Data.make_data_set(double_array_all, "all");
+
+        EncogUtility.saveEGB (new File("./train_data/trainingset_all"), all_data);
 
 
 
         //EncogUtility.saveEGB (new File("./train_data/trainingset_steering"), steering_data);
 
         System.out.println(steering_data.getInputSize());
-        System.out.println(brake_data.get(1));
-        System.out.println(brake_data.get(2));
+        System.out.println(acc_data.getInputSize());
+        System.out.println(brake_data.getInputSize());
+        System.out.println(all_data.getInputSize());
+        System.out.println(all_data.get(1));
+        System.out.println(all_data.get(2));
 
-        double desiredStandardDeviation = 0.2;
-        double desiredMean = 0;
-        Random r = new Random();
-        double mySample = r.nextGaussian()*desiredStandardDeviation+desiredMean;
-        System.out.println(mySample);
+
 
     }
 

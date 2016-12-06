@@ -1,6 +1,7 @@
 import cicontest.algorithm.abstracts.AbstractAlgorithm;
 import cicontest.algorithm.abstracts.DriversUtils;
 import cicontest.torcs.controller.Driver;
+import cicontest.torcs.race.RaceResult;
 import race.TorcsConfiguration;
 
 import java.io.File;
@@ -10,7 +11,7 @@ public class NNDriverAlgorithm extends AbstractAlgorithm {
     private static final long serialVersionUID = 654963126362653L;
 
     NNDriverGenome[] drivers = new NNDriverGenome[1];
-    int[] results = new int[1];
+    double[] results = new double[3];
 
     public Class<? extends Driver> getDriverClass() {
         return NNDriver.class;
@@ -28,8 +29,9 @@ public class NNDriverAlgorithm extends AbstractAlgorithm {
             race.laps = 1;
 
             //for speedup set withGUI to false
-            results = race.runRace(drivers, false);
-           // DriversUtils.storeGenome(drivers[0]);
+            RaceResult raceResult = race.runRace(drivers, false).get(0);
+            results = new double[]{raceResult.getDistance(), raceResult.getBestLapTime(), raceResult.getPosition()};
+            // DriversUtils.storeGenome(drivers[0]);
         }
         // create a checkpoint this allows you to continue this run later
         DriversUtils.createCheckpoint(this);

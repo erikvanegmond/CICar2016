@@ -37,7 +37,7 @@ public class train_NN {
         System.out.println("Creating new NEAT population");
         //input count, output count, population size
         NEATPopulation pop;// = loadPop(Const.ALL_NN_FNAME);
-        boolean usepop = false;
+        boolean usepop = true;
         if (usepop) {
             pop = loadPop(Const.ALL_NN_FNAME);
         } else {
@@ -47,7 +47,7 @@ public class train_NN {
         }
 
         EvolutionaryAlgorithm trainer;
-        boolean usedata = true;
+        boolean usedata = false;
         if(usedata) {
             iterations = 100;
             trainer = NEATUtil.constructNEATTrainer(pop, new TrainingSetScore(trainingSet));
@@ -78,10 +78,15 @@ public class train_NN {
             buildString.append(trainer.getIteration() + ",");
             buildString.append(trainer.getError() + ",");
             Population pop = trainer.getPopulation();
+            int pop_count = 0;
             for (final Species s : pop.getSpecies()) {
                 for (final Genome member : s.getMembers()) {
                     buildString.append(member.getScore() + ",");
+                    pop_count++;
                 }
+            }
+            while(pop_count < 10){
+                buildString.append(",");
             }
             buildString.append(trainer.getPopulation().getSpecies().size());
             buildString.append("\n");
