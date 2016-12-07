@@ -2,6 +2,7 @@ import cicontest.algorithm.abstracts.AbstractAlgorithm;
 import cicontest.algorithm.abstracts.DriversUtils;
 import cicontest.torcs.controller.Driver;
 import cicontest.torcs.race.RaceResult;
+import cicontest.torcs.race.RaceResults;
 import race.TorcsConfiguration;
 
 import java.io.File;
@@ -29,7 +30,8 @@ public class NNDriverAlgorithm extends AbstractAlgorithm {
             race.laps = 1;
 
             //for speedup set withGUI to false
-            RaceResult raceResult = race.runRace(drivers, false).get(0);
+            RaceResults raceResults = race.runRace(drivers, false);
+            RaceResult raceResult = (RaceResult) raceResults.values().toArray()[0];
             results = new double[]{raceResult.getDistance(), raceResult.getBestLapTime(), raceResult.getPosition()};
             // DriversUtils.storeGenome(drivers[0]);
         }

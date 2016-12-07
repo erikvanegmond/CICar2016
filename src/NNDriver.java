@@ -12,9 +12,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 
 public class NNDriver extends AbstractDriver {
-    NeuralNetworkWrapper accNN;
-    NeuralNetworkWrapper brakeNN;
-    NeuralNetworkWrapper steerNN;
+    NNDriverGenome ourGenome;
     double[][] min_max_array;
     int direction;
     Boolean on_road;
@@ -22,13 +20,8 @@ public class NNDriver extends AbstractDriver {
 
     public NNDriver() {
         initialize();
-        accNN = new NeuralNetworkWrapper("./trained_models/acc_NN");
-        brakeNN = new NeuralNetworkWrapper("./trained_models/brake_NN");
-        steerNN = new NeuralNetworkWrapper("./trained_models/steer_NN");
         min_max_array = load_min_max("./train_data/min_max_array.mem");
         direction = 0; // remembers last directions
-//        neuralNetwork = neuralNetwork.loadGenome();
-
     }
 
 
@@ -90,8 +83,8 @@ public class NNDriver extends AbstractDriver {
     }
     @Override
     public void loadGenome(IGenome genome) {
-        if (genome instanceof DefaultDriverGenome) {
-            DefaultDriverGenome myGenome = (DefaultDriverGenome) genome;
+        if (genome instanceof NNDriverGenome) {
+            ourGenome = (NNDriverGenome) genome;
         } else {
             System.err.println("Invalid Genome assigned");
         }
@@ -99,73 +92,16 @@ public class NNDriver extends AbstractDriver {
 
     @Override
     public double getAcceleration(SensorModel sensors) {
-        double[] sensorArray = new double[4];
-        sensorArray[0] = sensors.getSpeed();
-        sensorArray[1] = sensors.getTrackEdgeSensors()[6];
-        sensorArray[2] = sensors.getTrackEdgeSensors()[9];
-        sensorArray[3] = sensors.getTrackEdgeSensors()[12];
-
-
-        //System.arraycopy(sensors.getTrackEdgeSensors(), 0, sensorArray, 3, 19);
-
-
-        double output = accNN.getOutput(sensorArray);
-
-        if(output > 0.7 ){
-            return 1;
-        }
-        else {
-            return 0;
-        }
-
+        return ourGenome.network.getAcceleration();
     }
 
     public double getBraking(SensorModel sensors) {
-        double[] sensorArray = new double[4];
-        sensorArray[0] = sensors.getSpeed();
-        sensorArray[1] = sensors.getTrackEdgeSensors()[9];
-        //sensorArray[2] = sensors.getTrackEdgeSensors()[9];
-        //sensorArray[3] = sensors.getTrackEdgeSensors()[12];
-
-        //System.arraycopy(sensors.getTrackEdgeSensors(), 0, sensorArray, 3, 19);
-        //normalize the input since the NN is trained on normalized data.
-        //sensorArray= normalize_array( sensorArray );
-        double output = brakeNN.getOutput(sensorArray);
-        System.out.println(sensorArray[0] + "," + sensorArray[1] + "," + sensorArray[2] + "," + sensorArray[3]);
-        System.out.println(output);
-//        if(sensors.getSpeed() < 50){
-//            return  0;
-//        }
-
-        if(output > 0.2 ){
-            return 1;
-        }
-        else {
-            return 0;
-        }
-
+        return ourGenome.network.getBraking();
     }
 
     public double getSteering(SensorModel sensors) {
-        double[] sensorArray = new double[2];
-         sensorArray[0] = sensors.getTrackPosition();
-         sensorArray[1] = sensors.getAngleToTrackAxis();
-//        sensorArray[0] = sensors.getSpeed();
-//        sensorArray[1] = sensors.getTrackPosition();
-//        sensorArray[2] = sensors.getAngleToTrackAxis();
-//        sensorArray[3] = getTargetAngle(sensors);
-//        sensorArray[4] = sensors.getTrackEdgeSensors()[4];
-//        sensorArray[5] = sensors.getTrackEdgeSensors()[6];
-//        sensorArray[6] = sensors.getTrackEdgeSensors()[9];
-//        sensorArray[7] = sensors.getTrackEdgeSensors()[12];
-//        sensorArray[8] = sensors.getTrackEdgeSensors()[14];
-        //System.arraycopy(sensors.getTrackEdgeSensors(), 0, sensorArray, 3, 19);
-
-        double output = steerNN.getOutput(sensorArray);
-        return output;
+        return ourGenome.network.getSteering();
     }
-
-
 
     @Override
     public String getDriverName() {
@@ -181,11 +117,14 @@ public class NNDriver extends AbstractDriver {
     @Override
     public Action controlQualification(SensorModel sensors) {
         Action action = new Action();
+        System.out.println("racing q");
+
         return defaultControl(action, sensors);
     }
 
     @Override
     public Action controlRace(SensorModel sensors) {
+        System.out.println("racing");
         Action action = new Action();
         return defaultControl(action, sensors);
     }
@@ -196,45 +135,10 @@ public class NNDriver extends AbstractDriver {
         if (action == null) {
             action = new Action();
         }
-        //process whether we all stuck or not
-
-
-        System.out.print("am I on track?: ");
-        System.out.println(sensors.getTrackEdgeSensors()[18] );
-
-
-//
-//        if(sensors.getSpeed() < 30){
-//            action.accelerate = 1;
-//        }
-//
-//        if(sensors.getTrackEdgeSensors()[9] > 70){
-//            action.accelerate = 1;
-//        }
-//
-//        if(sensors.getTrackEdgeSensors()[9] < 75 & sensors.getSpeed() > 35){
-//            action.brake= 1;
-//        }
-
-
-        action.accelerate = getAcceleration(sensors);
+        ourGenome.network.updateActions(sensors);
         action.brake = getBraking(sensors);
-
-//        if(sensors.getTrackEdgeSensors()[4] < 3){
-//            extra_steer = -0.3;
-//        }
-//        if(sensors.getTrackEdgeSensors()[15] < 3){
-//            extra_steer = +0.3;
-//        }
-
-        action.steering = getSteering(sensors) ;//* 1.6;
-
-        System.out.println(sensors.getTrackPosition()) ;
-        System.out.println("--------------" + getDriverName() + "--------------");
-        System.out.println("Steering: " + action.steering);
-        System.out.println("Acceleration: " + action.accelerate);
-        System.out.println("Brake: " + action.brake);
-        System.out.println("-----------------------------------------------");
+        action.accelerate= getAcceleration(sensors);
+        action.steering = getSteering(sensors);
         return action;
     }
 }

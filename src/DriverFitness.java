@@ -1,4 +1,5 @@
 import cicontest.torcs.race.RaceResult;
+import cicontest.torcs.race.RaceResults;
 import org.encog.ml.CalculateScore;
 import org.encog.ml.MLMethod;
 import org.encog.neural.neat.NEATNetwork;
@@ -22,14 +23,10 @@ public class DriverFitness implements CalculateScore {
 
     @Override
     public boolean requireSingleThreaded() {
-        return false;
+        return true;
     }
 
     private static double computeFitness(RaceResult result) {
-        if (result.getLaps() == 0) {
-            return 0;
-        }
-        // todo incorporate crashes / damage
         return result.getDistance();
     }
 
@@ -47,9 +44,11 @@ public class DriverFitness implements CalculateScore {
             race.laps = 1;
 
             //for speedup set withGUI to false
-            return race.runRace(drivers, false).get(0);
+            RaceResults raceResults = race.runRace(drivers, false);
+            return (RaceResult) raceResults.values().toArray()[0];
         }else{
             return new RaceResult();
         }
     }
+
 }
