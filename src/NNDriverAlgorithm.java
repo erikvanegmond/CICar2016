@@ -24,11 +24,11 @@ public class NNDriverAlgorithm extends AbstractAlgorithm {
 
             //Start a race
             NNRace race = new NNRace();
-            race.setTrack("forza", "road");
+            race.setTrack("aalborg", "road");
             race.laps = 1;
 
             //for speedup set withGUI to false
-            results = race.runRace(drivers, false);
+            results = race.runRace(drivers, true);
 
 
 

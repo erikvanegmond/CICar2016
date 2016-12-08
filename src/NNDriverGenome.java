@@ -21,7 +21,7 @@ public class NNDriverGenome extends AbstractGenome {
     }
 
     public NNDriverGenome(){
-        this(Const.ALL_NN_FNAME);
+//        this(Const.ALL_NN_FNAME);
     }
 
     public NNDriverGenome(NEATNetwork neatNetwork){

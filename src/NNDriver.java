@@ -2,6 +2,7 @@ import cicontest.algorithm.abstracts.AbstractDriver;
 import cicontest.torcs.controller.extras.ABS;
 import cicontest.torcs.controller.extras.AutomatedClutch;
 import cicontest.torcs.controller.extras.AutomatedGearbox;
+import cicontest.torcs.controller.extras.AutomatedRecovering;
 import cicontest.torcs.genome.IGenome;
 import scr.Action;
 import scr.SensorModel;
@@ -22,10 +23,10 @@ public class NNDriver extends AbstractDriver {
 
     public NNDriver() {
         initialize();
-        accNN = new NeuralNetworkWrapper("./trained_models/acc_NN");
-        brakeNN = new NeuralNetworkWrapper("./trained_models/brake_NN");
-        steerNN = new NeuralNetworkWrapper("./trained_models/steer_NN");
-        min_max_array = load_min_max("./train_data/min_max_array.mem");
+        accNN = new NeuralNetworkWrapper("/acc_NN");
+        brakeNN = new NeuralNetworkWrapper("/brake_NN");
+        steerNN = new NeuralNetworkWrapper("/steer_NN");
+//        min_max_array = load_min_max("/min_max_array.mem");
         direction = 0; // remembers last directions
 //        neuralNetwork = neuralNetwork.loadGenome();
 
@@ -66,23 +67,23 @@ public class NNDriver extends AbstractDriver {
         return null;
     }
 
-    double[] normalize_array(double[] input ){
-        double value;
-        double min;
-        double max;
-
-        double[] output = new double[ input.length ];
-
-        for(int i=0; i<input.length; i++ ){
-
-            value = input[i];
-            min = this.min_max_array[i][0];
-            max = this.min_max_array[i][1];
-            output[i] = (value - min) / (max - min);
-        }
-
-        return output;
-    }
+//    double[] normalize_array(double[] input ){
+//        double value;
+//        double min;
+//        double max;
+//
+//        double[] output = new double[ input.length ];
+//
+//        for(int i=0; i<input.length; i++ ){
+//
+//            value = input[i];
+//            min = this.min_max_array[i][0];
+//            max = this.min_max_array[i][1];
+//            output[i] = (value - min) / (max - min);
+//        }
+//
+//        return output;
+//    }
 
     public double getTargetAngle(SensorModel sensors){
         double targetAngle=(sensors.getAngleToTrackAxis()-sensors.getTrackPosition()*0.5);
@@ -170,7 +171,7 @@ public class NNDriver extends AbstractDriver {
 
     @Override
     public String getDriverName() {
-        return "Group 21's Race Car";
+        return "Neuron Controller";
     }
 
     @Override

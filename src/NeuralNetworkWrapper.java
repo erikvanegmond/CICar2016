@@ -18,8 +18,9 @@ public class NeuralNetworkWrapper implements Serializable {
     BasicNetwork NN_acc ;
 
     public NeuralNetworkWrapper(String filePath) {
-        NN_acc = (BasicNetwork) EncogDirectoryPersistence.loadObject(new File(filePath));
-
+        System.out.println("reading "+filePath);
+        InputStream input = getClass().getResourceAsStream(filePath);
+        NN_acc = (BasicNetwork) EncogDirectoryPersistence.loadObject(input);
     }
 
 
